@@ -1,0 +1,13 @@
+<module>
+  <inherits name='com.threerings.sling.Sling'/>
+
+  <extend-property name="locale" values="en"/>
+  <extend-property name="locale" values="fr"/>
+  <extend-property name="locale" values="it"/>
+  <extend-property name="locale" values="de"/>
+  <extend-property name="locale" values="es"/>
+  <set-property-fallback name="locale" value="en"/>
+
+  <public path="gwt/public/user"/>
+  <stylesheet src="user.css"/>
+</module>

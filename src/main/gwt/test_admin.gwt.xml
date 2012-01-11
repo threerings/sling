@@ -1,0 +1,6 @@
+<module>
+  <inherits name='com.threerings.sling.Admin'/>
+  <entry-point class='client.admin'/>
+  <public path="public/test_admin"/>
+  <servlet path="/data" class="com.threerings.sling.web.server.TestSlingServlet"/>
+</module>

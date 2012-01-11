@@ -1,0 +1,5 @@
+<module>
+  <inherits name='com.threerings.sling.Sling'/>
+  <public path="gwt/public/admin"/>
+  <stylesheet src="admin.css"/>
+</module>

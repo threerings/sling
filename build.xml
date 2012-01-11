@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<project name="sling" default="compile" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+  <property name="src.dir"    value="src/main/java"/>
+  <property name="gsrc.dir"   value="src/main/gwt"/>
+  <property name="deploy.dir" value="dist"/>
+
+  <!-- bring in our standard build support -->
+  <property name="ooo-build.vers" value="2.7"/>
+  <ant antfile="bootstrap.xml"/>
+  <import file="${user.home}/.m2/ooo-build/${ooo-build.vers}/ooo-build.xml"/>
+
+  <target name="prepare" depends="-init-ooo">
+    <mkdir dir="${deploy.dir}/classes"/>
+    <mavendep pom="pom.xml"/>
+    <mavendep pom="gwt-pom.xml"/>
+  </target>
+
+  <path id="built.classpath">
+    <path refId="pom.xml.path"/>
+    <pathelement location="${deploy.dir}/classes"/>
+  </path>
+
+  <target name="genrecord" depends="prepare">
+    <taskdef name="grecord" classname="com.samskivert.depot.tools.GenRecordTask"
+           classpathref="pom.xml.path"/>
+    <!-- make sure the record class files are all compiled -->
+    <ooojavac srcdir="${src.dir}" destdir="${deploy.dir}/classes" classpathref="pom.xml.path">
+      <include name="**/*Record.java"/>
+    </ooojavac>
+    <!-- now update the source files -->
+    <grecord classpathref="built.classpath">
+      <fileset dir="${src.dir}" includes="**/*Record.java"/>
+    </grecord>
+  </target>
+
+  <target name="clean" description="Cleans out compiled classes.">
+    <delete dir="${deploy.dir}/classes"/>
+    <delete file="${gsrc.dir}/com/threerings/sling/gwt/client/ClientMessages.java"/>
+    <delete file="${gsrc.dir}/com/threerings/sling/gwt/ui/UiMessages.java"/>
+  </target>
+
+  <target name="distclean" depends="clean" description="Cleans out all build resultss.">
+    <delete dir="${deploy.dir}"/>
+  </target>
+
+  <target name="gmsgs" depends="prepare">
+    <taskdef name="i18nsync" classname="com.threerings.gwt.tools.I18nSyncTask"
+           classpathref="gwt-pom.xml.path"/>
+    <i18nsync srcdir="${gsrc.dir}">
+      <fileset dir="${gsrc.dir}" includes="**/*Messages.properties"
+               excludes="**/ServerMessages.properties"/>
+    </i18nsync>
+  </target>
+
+  <target name="compile" depends="gmsgs" description="Compiles main sources.">
+    <!-- compile our server code with build.classpath -->
+    <ooojavac srcdir="${src.dir}" destdir="${deploy.dir}/classes" version="1.5"
+      classpathref="pom.xml.path"/>
+    <!-- compile our GWT code with gwt-build.classpath -->
+    <ooojavac srcdir="${gsrc.dir}" destdir="${deploy.dir}/classes" version="1.5"
+      classpathref="gwt-pom.xml.path"/>
+  </target>
+
+  <target name="dist" depends="compile" description="Builds jar files.">
+    <jar destfile="${deploy.dir}/${ant.project.name}.jar" basedir="${deploy.dir}/classes"/>
+
+    <!-- we export a small selection of classes for use by GWT -->
+    <jar destfile="${deploy.dir}/${ant.project.name}-gwt.jar">
+      <fileset dir="${gsrc.dir}" includes="com/**"/>
+      <fileset dir="${src.dir}" includes="**/web/**/*.java" excludes="**/server/**"/>
+    </jar>
+  </target>
+
+  <target name="maven-deploy" depends="dist"
+    description="Deploys build artifacts to a Maven repository.">
+    <mavendeploy file="${deploy.dir}/${ant.project.name}.jar" pom="pom.xml" srcdir="${src.dir}"/>
+    <mavendeploy file="${deploy.dir}/${ant.project.name}-gwt.jar" pom="gwt-pom.xml"/>
+  </target>
+</project>

@@ -1,0 +1,14 @@
+<module>
+  <inherits name="com.google.gwt.user.User"/>
+  <inherits name="com.google.gwt.i18n.I18N"/>
+  <inherits name="com.google.common.collect.Collect"/>
+  <inherits name="com.threerings.gwt.Utils"/>
+
+  <source path="web/client"/>
+  <source path="web/data"/>
+  <source path="gwt/client"/>
+  <source path="gwt/ui"/>
+  <source path="gwt/util"/>
+  <public path="gwt/public/sling"/>
+  <stylesheet src="sling.css"/>
+</module>

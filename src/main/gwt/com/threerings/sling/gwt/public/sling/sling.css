@@ -1,0 +1,144 @@
+/**
+ * $Id: sling.css 469 2011-03-18 18:21:07Z jamie $
+ *
+ * Global interface styles.
+ */
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/** The main application panel. Here we define all the global inherited sling styles. */
+table.uMain {
+  width: 100%;
+  height: 100%;
+  text-align: left; 
+}
+
+/** The application toolbar */
+table.uMain td.ToolBar {
+  background: lightgrey;
+}
+
+/** The application content */
+table.uMain  td.Content {
+  height: 100%;
+  vertical-align: top;
+}
+
+/** The application toolbar for logging in */
+table.uLoginBar {
+  padding: 0 4px;
+}
+
+/** Error message labels */
+.uError {
+  color: red;
+  font-weight: bold;
+}
+
+/** Paged Grid components (currently only used for EventsTable) */
+.pagedGrid .Header .Link {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.pagedGrid .Header .Page {
+  padding: 0 2px;
+}
+
+.pagedGrid .Header .Current {
+  font-weight: bold;
+}
+
+/** Popup confirmation components */
+.gwt-ConfirmPopup {
+  border: thick ridge LightBlue;
+}
+
+.gwt-ConfirmPopup .gwt-PushButton {
+  border: medium outset LightBlue;
+}
+
+.gwt-ConfirmPopup .gwt-PushButton {
+  width: 93px;
+  cursor: pointer;
+  background: LightBlue;
+}
+
+.gwt-ConfirmPopup .gwt-PushButton-up,
+.gwt-ConfirmPopup .gwt-PushButton-up-hovering {
+  border: medium outset LightBlue;
+}
+
+.gwt-ConfirmPopup .gwt-PushButton-down,
+.gwt-ConfirmPopup .gwt-PushButton-down-hovering {
+  border: medium inset LightBlue;
+}
+
+/* Menus (currently only used in related accounts panel) */
+.gwt-MenuBar {
+  border: thin solid black;
+  cursor: pointer;
+  background: White;
+}
+
+.gwt-MenuBar .gwt-MenuItem-selected {
+  background: AliceBlue;
+}
+
+.gwt-MenuBarPopup .gwt-MenuItem-selected {
+  background: LightBlue;
+}
+
+/* Info popups (we use these for FAQs) */
+.infoPopup {
+  width: 500px;
+}
+
+/* FAQ viewing panel */
+.uFaqPanel {
+  max-width: 500px;
+}
+
+.uFaqPanel p {
+  margin: 0;
+  padding: 0;
+}
+
+.uFaqPanel .Title {
+  font-size: 18pt;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 2px solid black;
+}
+
+.uFaqPanel .Category {
+  font-size: 14pt;
+  padding-top: 10px;
+}
+
+.uFaqPanel .Question {
+  font-size: 10pt;
+  padding-left: 20px;
+}
+
+.uFaqPanel .EditLink, .uFaqPanel .ViewLink {
+  font-size: 9pt;
+  float: right;
+}
+
+.uFaqPanel .Instructions {
+  margin-top: 10px;
+  font-size: 9pt;
+  font-style: italic;
+}
+
+.uFaqPanel .Instructions div {
+  display: inline;
+}
+
+.uTimeRange div, .uTimeRange table.uDate {
+  display: inline;
+  vertical-align: middle;
+}

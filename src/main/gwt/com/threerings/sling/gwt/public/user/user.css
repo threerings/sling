@@ -1,0 +1,110 @@
+/*
+ * $Id: user.css 496 2011-03-25 21:07:47Z jamie $
+ *
+ * User interface styles
+ */
+
+/* Petitions panel */
+.uPetitionsPanel {
+  font-size: 10pt;
+  width: 100%;
+}
+
+.uPetitionsPanel .Title {
+  font-size: 18pt;
+  font-weight: bold;
+  border-bottom: 2px solid black;
+  margin: 0;
+}
+
+.uPetitionsPanel .RefreshBtn {
+  font-size: 9pt;
+  font-weight: normal;
+  padding-left: 10px;
+}
+
+.uPetitionsPanel .Petition {
+  padding: 15px 0;
+  border-bottom: thin dashed gray;
+}
+
+.uPetitionsPanel .Petition .Header button {
+  margin-left: 10px;
+}
+
+.uPetitionsPanel .Petition .Subject {
+  font-weight: bold;
+  font-size: 12pt;
+}
+
+.uPetitionsPanel .Petition .Label {
+}
+
+.uPetitionsPanel .Petition .Status {
+  font-weight: bold;
+}
+
+.uPetitionsPanel .Petition .StatusOpen {
+  color: Green;
+}
+
+.uPetitionsPanel .Petition .StatusClosed {
+  color: Red;
+}
+
+.uPetitionsPanel .Petition .PostReplyBtn {
+}
+
+.uPetitionsPanel .Petition .RepliesHeader {
+  margin-bottom: 0;
+}
+
+.uPetitionsPanel .Petition .Replies {
+  padding-left: 10px;
+}
+
+.uPetitionsPanel .Petition .Replies .New {
+  background: Pink;
+}
+
+.uPetitionsPanel .Petition .Replies .Other{
+  background: PaleGreen;
+}
+
+.uPetitionsPanel .Petition .Replies .Reply {
+  margin-top: 5px;
+}
+
+.uPetitionsPanel .Petition .Replies .Reply .Author {
+  font-weight: bold;
+}
+
+.uPetitionsPanel .Petition .Replies .Reply .Date {
+  font-style: italic;
+}
+
+.uPetitionsPanel .Petition .Replies .Reply .Body {
+  white-space: pre-wrap;
+}
+
+/* Submit petition panel */
+.uSubmitPetition {
+  font-size: 10pt;
+  width: 500px;
+}
+
+.uSubmitPetition .Label {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.uSubmitPetition .MessageLabel {
+  vertical-align: top;
+  padding-top: 5px;
+}
+
+.uSubmitPetition .Instruction {
+  padding: 10px 0;
+  font-style: italic;
+  font-weight: bold;
+}
