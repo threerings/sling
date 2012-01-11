@@ -18,7 +18,7 @@
     <dependency>
       <groupId>com.samskivert</groupId>
       <artifactId>depot</artifactId>
-      <version>1.6-SNAPSHOT</version>
+      <version>1.5</version>
     </dependency>
     <dependency>
       <groupId>com.threerings</groupId>
@@ -28,7 +28,7 @@
     <dependency>
       <groupId>com.threerings</groupId>
       <artifactId>narya</artifactId>
-      <version>1.11-SNAPSHOT</version>
+      <version>1.10</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
