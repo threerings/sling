@@ -140,7 +140,7 @@ public class FAQPanels extends FlowPanel
                 _category = new Category();
                 _category.name = input;
                 _category.questions = Lists.newArrayList();
-                ctx.undersvc.storeCategory(_category, this);
+                ctx.svc.storeCategory(_category, this);
                 return true;
             }
 
@@ -181,7 +181,7 @@ public class FAQPanels extends FlowPanel
                     Popups.error(_msgs.enterAnswer());
                     return false;
                 }
-                ctx.undersvc.storeQuestion(question, this);
+                ctx.svc.storeQuestion(question, this);
                 return true;
             }
 

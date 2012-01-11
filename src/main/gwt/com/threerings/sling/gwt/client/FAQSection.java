@@ -81,7 +81,7 @@ public class FAQSection<Ctx extends SlingContext>
         @Override
         protected String callService ()
         {
-            _ctx.undersvc.getFAQs(this);
+            _ctx.svc.getFAQs(this);
             return _msgs.loadingFaqs();
         }
 

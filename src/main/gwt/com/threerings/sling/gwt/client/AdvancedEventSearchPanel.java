@@ -397,7 +397,7 @@ public class AdvancedEventSearchPanel extends FlowPanel
                  protected void callFetchService (
                      PagedRequest request, AsyncCallback<PagedResult<Event>> callback)
             {
-                _ctx.undersvc.searchEvents(search, request, callback);
+                _ctx.svc.searchEvents(search, request, callback);
             }
 
             @Override // from ServiceBackedDataModel

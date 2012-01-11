@@ -81,7 +81,7 @@ public class SubmitPetitionPanel extends NamedRowSmartTable
         if (updateEmailBtn != null) {
             new ClickCallback<Void>(updateEmailBtn, email) {
                 @Override protected boolean callService () {
-                    _ctx.undersvc.updateEmail(email.getText(), this);
+                    _ctx.svc.updateEmail(email.getText(), this);
                     return true;
                 }
 
@@ -118,7 +118,7 @@ public class SubmitPetitionPanel extends NamedRowSmartTable
                     return false;
                 }
                 String gameName = hasGameNames ? gameNames.getItemText(gameNameIdx) : null;
-                _ctx.undersvc.registerPetition(petition, gameName, msg, this);
+                _ctx.svc.registerPetition(petition, gameName, msg, this);
                 return true;
             }
 

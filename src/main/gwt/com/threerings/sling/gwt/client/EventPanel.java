@@ -208,7 +208,7 @@ public class EventPanel extends FlowPanel
 
                 _status.setEnabled(false);
                 _event.status = _status.getSelectedItem();
-                _ctx.undersvc.updateEvent(_event.eventId, _event.status, statusCallback);
+                _ctx.svc.updateEvent(_event.eventId, _event.status, statusCallback);
             }
         });
 
@@ -229,7 +229,7 @@ public class EventPanel extends FlowPanel
         _waitingForPlayer.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override public void onValueChange (ValueChangeEvent<Boolean> event) {
                 _waitingForPlayer.setEnabled(false);
-                _ctx.undersvc.setWaitingForPlayer(_event.eventId, event.getValue(),
+                _ctx.svc.setWaitingForPlayer(_event.eventId, event.getValue(),
                         waitFlagCallback);
             }
         });
@@ -249,13 +249,13 @@ public class EventPanel extends FlowPanel
             };
 
             @Override public void onChange (ChangeEvent event) {
-                _ctx.undersvc.setLanguage(
+                _ctx.svc.setLanguage(
                     _event.eventId, language.getSelectedItem(), callback);
             }
         });
 
         // load up our messages
-        _ctx.undersvc.loadMessages(event.eventId, new AsyncCallback<Message[]>() {
+        _ctx.svc.loadMessages(event.eventId, new AsyncCallback<Message[]>() {
             public void onSuccess (Message[] messages) {
                 _messages.clear();
                 for (int ii = messages.length - 1; ii >= 0; ii--) {
@@ -342,7 +342,7 @@ public class EventPanel extends FlowPanel
             new InputClickCallback<AssignEventResult, TextBox>(assignBtn,
                     Widgets.newTextBox(_ctx.supportPrefix, 230, 50)) {
                 @Override public boolean callService (String message) {
-                    _ctx.undersvc.assignEvent(_event.eventId,
+                    _ctx.svc.assignEvent(_event.eventId,
                         Event.Status.IN_PROGRESS, message, this);
                     return true;
 
@@ -372,7 +372,7 @@ public class EventPanel extends FlowPanel
             new ClickCallback<Message>(claimBtn) {
                 @Override protected boolean callService () {
                     _event.status = Event.Status.IN_PROGRESS;
-                    _ctx.undersvc.updateEvent(_event.eventId, _event.status, this);
+                    _ctx.svc.updateEvent(_event.eventId, _event.status, this);
                     return true;
                 }
 

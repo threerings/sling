@@ -54,7 +54,7 @@ public class AccountsSection<Ctx extends SlingContext>
             final int accountId = Integer.parseInt(shifter.next());
             final SimplePanel container = Widgets.newSimplePanel(null,
                 Widgets.newInlineLabel(_msgs.findingRelatedAccounts()));
-            ctx.undersvc.getRelatedAccounts(accountId,
+            ctx.svc.getRelatedAccounts(accountId,
                 new AsyncCallback<List<MachineIdentity>>() {
                     @Override
                     public void onFailure (Throwable caught)
@@ -88,20 +88,20 @@ public class AccountsSection<Ctx extends SlingContext>
         String query = shifter.next();
         switch(Nav.asEnum(Accounts.SearchBy.class, search)) {
         case USERNAME:
-            ctx.undersvc.getAccount(query, createAccountCallback(ctx, container,
+            ctx.svc.getAccount(query, createAccountCallback(ctx, container,
                 _msgs.accountNotFound(query)));
             break;
         case ACCOUNTNAME:
-            ctx.undersvc.getAccountByName(query, createAccountCallback(ctx, container,
+            ctx.svc.getAccountByName(query, createAccountCallback(ctx, container,
                 _msgs.accountNotFoundWithName(query)));
             break;
         case GAMENAME:
-            ctx.undersvc.findAccountsByGameName(query, createListCallback(ctx,
+            ctx.svc.findAccountsByGameName(query, createListCallback(ctx,
                 container, _msgs.noAccountsFoundMatchingGameName(query),
                 _msgs.accountsMatchingGameName(query)));
             break;
         case EMAIL:
-            ctx.undersvc.findAccountsByEmail(query, createListCallback(ctx, container,
+            ctx.svc.findAccountsByEmail(query, createListCallback(ctx, container,
                 _msgs.noAccountsFoundMatchingEmail(query),
                 _msgs.accountsMatchingEmail(query)));
             break;
@@ -141,7 +141,7 @@ public class AccountsSection<Ctx extends SlingContext>
                     target.setWidget(Widgets.newInlineLabel(error));
                 } else if (names.length == 1) {
                     target.setWidget(Widgets.newInlineLabel(_msgs.foundOneMatchOpening()));
-                    ctx.undersvc.getAccountByName(names[0].accountName,
+                    ctx.svc.getAccountByName(names[0].accountName,
                         createAccountCallback(ctx, target, _msgs.accountNotFound(
                             names[0].toString())));
                 } else {

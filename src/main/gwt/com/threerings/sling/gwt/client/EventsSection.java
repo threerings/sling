@@ -60,7 +60,7 @@ public class EventsSection<Ctx extends SlingContext>
                 protected void callFetchService (
                     PagedRequest request, AsyncCallback<PagedResult<Event>> callback)
                 {
-                    ctx.undersvc.loadEvents(by, query, request, callback);
+                    ctx.svc.loadEvents(by, query, request, callback);
                 }
 
                 @Override // from ServiceBackedDataModel
@@ -82,7 +82,7 @@ public class EventsSection<Ctx extends SlingContext>
             final int eventId = Integer.parseInt(shifter.next());
             return new LoadingPanel<Event>() {
                 @Override protected String callService () {
-                    ctx.undersvc.loadEvent(eventId, this);
+                    ctx.svc.loadEvent(eventId, this);
                     return _msgs.loadingEvent(String.valueOf(eventId));
                 }
 

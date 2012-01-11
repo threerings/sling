@@ -221,7 +221,7 @@ public class AccountPanel extends NamedRowSmartTable
                             @Override
                             public boolean callService ()
                             {
-                                _ctx.undersvc.updateTempBan(
+                                _ctx.svc.updateTempBan(
                                     _account.name.accountName, 0, null, this);
                                 return true;
                             }
@@ -250,7 +250,7 @@ public class AccountPanel extends NamedRowSmartTable
             @Override
             public boolean callService ()
             {
-                _ctx.undersvc.updateBanned(_account.accountId,
+                _ctx.svc.updateBanned(_account.accountId,
                     false, null, clearIdents.getValue(), this);
                 return true;
             }
@@ -275,7 +275,7 @@ public class AccountPanel extends NamedRowSmartTable
             public boolean callService (String message)
             {
                 _banMessage = message;
-                _ctx.undersvc.updateBanned(_account.accountId,
+                _ctx.svc.updateBanned(_account.accountId,
                     true, message, false, this);
                 return true;
             }
@@ -300,7 +300,7 @@ public class AccountPanel extends NamedRowSmartTable
             {
                 String value = email.getText();
                 if (value.length() > 0) {
-                    _ctx.undersvc.updateAccount(_account.accountId, value,
+                    _ctx.svc.updateAccount(_account.accountId, value,
                         null, this);
                     return true;
                 }
@@ -323,7 +323,7 @@ public class AccountPanel extends NamedRowSmartTable
                 if (value.length() == 0) {
                     return false;
                 }
-                _ctx.undersvc.updateAccount(_account.accountId, null,
+                _ctx.svc.updateAccount(_account.accountId, null,
                     _ctx.frame.md5hex(value), this);
                 return true;
             }
@@ -346,7 +346,7 @@ public class AccountPanel extends NamedRowSmartTable
                     Popups.error(_msgs.tempBanDaysMustBePositiveNumber());
                     return false;
                 }
-                _ctx.undersvc.updateTempBan(_account.name.accountName,
+                _ctx.svc.updateTempBan(_account.name.accountName,
                     _banDays, input, this);
                 return true;
             }
@@ -370,7 +370,7 @@ public class AccountPanel extends NamedRowSmartTable
             protected boolean callService (String input)
             {
                 _warnMessage = input;
-                _ctx.undersvc.updateWarning(_account.name.accountName, input,
+                _ctx.svc.updateWarning(_account.name.accountName, input,
                     this);
                 return true;
             }
@@ -395,7 +395,7 @@ public class AccountPanel extends NamedRowSmartTable
             @Override
             protected boolean callService ()
             {
-                _ctx.undersvc.updateWarning(_account.name.accountName, null,
+                _ctx.svc.updateWarning(_account.name.accountName, null,
                     this);
                 return true;
             }

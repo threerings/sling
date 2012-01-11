@@ -159,7 +159,7 @@ public abstract class ReportPanel<T> extends FlowPanel
                 range = rangeCtrl.require();
                 type = typeCtrl.getSelectedItem();
                 millis = hoursCtrl.getNumber().intValue() * TimeUnit.HOUR.millis;
-                _ctx.undersvc.checkResponseTimes(type, range, millis, _callback);
+                _ctx.svc.checkResponseTimes(type, range, millis, _callback);
                 return Reports.firstResponse(type, range, millis);
             }
 
@@ -214,7 +214,7 @@ public abstract class ReportPanel<T> extends FlowPanel
                 unit = timeUnitsCtrl.getSelectedItem();
                 count = countCtrl.getNumber().intValue();
                 now = UniversalTime.now();
-                _ctx.undersvc.getVolume(now, unit, count, _callback);
+                _ctx.svc.getVolume(now, unit, count, _callback);
                 return Reports.recentVolume(unit, count);
             }
 
@@ -262,7 +262,7 @@ public abstract class ReportPanel<T> extends FlowPanel
             @Override protected PageAddress callService () {
                 range = rangeCtrl.require();
                 types = typesCtrl.getSelectedItem();
-                _ctx.undersvc.getAverageVolume(range, types, _callback);
+                _ctx.svc.getAverageVolume(range, types, _callback);
                 return Reports.averageVolume(range, types);
             }
 
@@ -318,7 +318,7 @@ public abstract class ReportPanel<T> extends FlowPanel
             }
 
             @Override protected PageAddress callService () {
-                _ctx.undersvc.getAgentActivity(_callback);
+                _ctx.svc.getAgentActivity(_callback);
                 return Reports.agentActivity();
             }
 

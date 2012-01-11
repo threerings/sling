@@ -28,7 +28,7 @@ public abstract class SlingEntryPoint
         // create our web context
         _ctx = createContext();
         _ctx.app = createApp();
-        _ctx.undersvc = (SlingServiceAsync)initService(GWT.create(SlingService.class));
+        _ctx.svc = (SlingServiceAsync)initService(GWT.create(SlingService.class));
     }
 
     /**

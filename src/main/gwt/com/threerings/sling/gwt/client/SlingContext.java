@@ -55,7 +55,7 @@ public class SlingContext
     public SlingService.AuthInfo ainfo;
 
     /** Used to make requests of the server. */
-    public SlingServiceAsync undersvc;
+    public SlingServiceAsync svc;
 
     /** May be overwritten by application if sling is to be embedded. */
     public Frame frame = makeDefaultFrame();
@@ -96,7 +96,7 @@ public class SlingContext
     public void validateSession (final AsyncCallback<Void> callback)
     {
         // validate that the session token has not expired
-        undersvc.validateSession(new AsyncCallback<SlingService.AuthInfo>() {
+        svc.validateSession(new AsyncCallback<SlingService.AuthInfo>() {
             public void onSuccess (SlingService.AuthInfo result) {
 
                 // back door for development to login to standalone app (it doesn't matter if
@@ -131,7 +131,7 @@ public class SlingContext
     public void login (String username, String password, final AsyncCallback<Void> callback)
     {
         password = frame.md5hex(password);
-        undersvc.login(username, password, new AsyncCallback<SlingService.AuthInfo>() {
+        svc.login(username, password, new AsyncCallback<SlingService.AuthInfo>() {
             public void onSuccess (SlingService.AuthInfo result) {
                 ainfo = result;
                 ServerTime.setOffset(ainfo.serverInfo.timeZoneOffset);
@@ -158,7 +158,7 @@ public class SlingContext
     public void logout (final AsyncCallback<Void> callback)
     {
         ainfo = null;
-        undersvc.logout(new AsyncCallback<String>() {
+        svc.logout(new AsyncCallback<String>() {
             @Override public void onFailure (Throwable caught) {
                 callback.onFailure(caught);
             }

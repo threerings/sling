@@ -55,7 +55,7 @@ public class PetitionsPanel extends FlowPanel
             @Override
             protected boolean callService ()
             {
-                _ctx.undersvc.loadPetitions(this);
+                _ctx.svc.loadPetitions(this);
                 return true;
             }
 
@@ -135,7 +135,7 @@ public class PetitionsPanel extends FlowPanel
                 @Override
                 protected boolean callService (String input)
                 {
-                    _ctx.undersvc.postMessage(petition.eventId,
+                    _ctx.svc.postMessage(petition.eventId,
                         Message.Access.NORMAL, input, true, this);
                     return true;
                 }

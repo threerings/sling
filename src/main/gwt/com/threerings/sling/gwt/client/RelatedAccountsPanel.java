@@ -163,7 +163,7 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
             }
 
             @Override protected void callService (boolean value) {
-                _ctx.undersvc.updateIdentTaint(ident.machIdent, value, this);
+                _ctx.svc.updateIdentTaint(ident.machIdent, value, this);
             }
         };
 
@@ -179,7 +179,7 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
             }
 
             @Override protected void callService (boolean value) {
-                _ctx.undersvc.updateIdentBanned(ident.machIdent, value, this);
+                _ctx.svc.updateIdentBanned(ident.machIdent, value, this);
             }
         };
 

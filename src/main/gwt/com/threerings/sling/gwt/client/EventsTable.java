@@ -163,7 +163,7 @@ public class EventsTable extends PagedTable<Event>
         for (int ii = 0, size = checkedIds.size(); ii < size; ++ii) {
             eventIds[ii] = checkedIds.get(ii);
         }
-        _ctx.undersvc.updateEvents(eventIds, Event.Status.IGNORED_CLOSED,
+        _ctx.svc.updateEvents(eventIds, Event.Status.IGNORED_CLOSED,
             new AsyncCallback<Void>() {
                 public void onSuccess (Void result)
                 {

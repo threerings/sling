@@ -67,7 +67,7 @@ public class PostMessagePanel extends FlowPanel
 
         new ClickCallback<PostMessageResult>(post) {
             @Override protected boolean callService () {
-                ctx.undersvc.postMessage(event.eventId,
+                ctx.svc.postMessage(event.eventId,
                     playerVisible ? Message.Access.NORMAL : Message.Access.SUPPORT,
                     InputUtil.requireNonEmpty(msg, _msgs.errNoMessage()),
                     playerVisible ? updateWaitFlag.getValue() : false, this);

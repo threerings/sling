@@ -57,7 +57,7 @@ public class PostNotePanel extends SmartTable
             @Override
             protected boolean callService ()
             {
-                _ctx.undersvc.addNote(_accountName, subject.getText(),
+                _ctx.svc.addNote(_accountName, subject.getText(),
                     text.getText(), this);
                 return true;
             }
