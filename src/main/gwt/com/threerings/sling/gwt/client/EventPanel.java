@@ -6,6 +6,10 @@ package com.threerings.sling.gwt.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -15,6 +19,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -42,6 +47,26 @@ import static com.threerings.sling.gwt.client.SlingUtils.translateServerError;
  */
 public class EventPanel extends FlowPanel
 {
+    /**
+     * Creates a label that swaps text based on open/close events.
+     */
+    public static Label changeTextOnOpenOrClose (DisclosurePanel panel,
+        final String closedText, final String openedText)
+    {
+        final Label label = Widgets.newInlineLabel(closedText);
+        panel.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+            @Override public void onOpen (OpenEvent<DisclosurePanel> event) {
+                label.setText(openedText);
+            }
+        });
+        panel.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+            @Override public void onClose (CloseEvent<DisclosurePanel> event) {
+                label.setText(closedText);
+            }
+        });
+        return label;
+    }
+
     /**
      * Creates an event panel for the given event.
      */
@@ -157,16 +182,20 @@ public class EventPanel extends FlowPanel
         add(Widgets.newLabel(_msgs.messages(), "MessagesHeader"));
 
         _postNote.addStyleName("PostMessageDisclosure");
-        _postNote.setHeader(Widgets.newFlowPanel(
-            Widgets.newInlineLabel(_msgs.postNoteHeader() + " "),
+        Label postNoteLabel = changeTextOnOpenOrClose(_postNote,
+            _msgs.postNoteHeader() + " ",
+            _msgs.postNoteHeaderOpen() + " ");
+        _postNote.setHeader(Widgets.newFlowPanel(postNoteLabel,
             SlingUtils.makeLink(ctx, _msgs.standaloneLink(), Events.postNote(event.eventId))));
         _postNote.setContent(new PostMessagePanel(ctx, event, false, this));
         add(_postNote);
 
         if (event.type == Event.Type.PETITION) {
             _postReply.addStyleName("PostMessageDisclosure");
-            _postReply.setHeader(Widgets.newFlowPanel(
-                Widgets.newInlineLabel(_msgs.postReplyHeader() + " "),
+            Label postReplyLabel = changeTextOnOpenOrClose(_postNote,
+                _msgs.postReplyHeader() + " ",
+                _msgs.postReplyHeaderOpen() + " ");
+            _postReply.setHeader(Widgets.newFlowPanel(postReplyLabel,
                 SlingUtils.makeLink(ctx, _msgs.standaloneLink(), Events.postReply(event.eventId))));
             _postReply.setContent(new PostMessagePanel(ctx, event, true, this));
             add(_postReply);
