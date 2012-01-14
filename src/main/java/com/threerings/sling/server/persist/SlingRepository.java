@@ -16,8 +16,6 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import com.samskivert.jdbc.ConnectionProvider;
-
 import com.samskivert.depot.DateFuncs;
 import com.samskivert.depot.DepotRepository;
 import com.samskivert.depot.Funcs;
@@ -61,12 +59,6 @@ public class SlingRepository extends DepotRepository
 
         /** Loads a page of results. */
         List<T> load(int offset, int count);
-    }
-
-    public SlingRepository (ConnectionProvider conprov)
-    {
-        // TODO: is this still needed? Bang will probably never convert to sling
-        this(new PersistenceContext("underwiredb", conprov, null));
     }
 
     @Inject public SlingRepository (PersistenceContext ctx)

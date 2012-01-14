@@ -27,18 +27,22 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.UnexpectedException;
+import com.google.inject.Inject;
 
 import com.samskivert.net.MailUtil;
 import com.samskivert.util.Calendars;
 import com.samskivert.util.HashIntMap;
 import com.samskivert.util.StringUtil;
 
+import com.samskivert.servlet.SiteIdentifier;
 import com.samskivert.servlet.user.AuthenticationFailedException;
 import com.samskivert.servlet.user.InvalidPasswordException;
 import com.samskivert.servlet.user.NoSuchUserException;
@@ -49,8 +53,10 @@ import com.threerings.util.OOOConfig;
 import com.threerings.gwt.util.PagedRequest;
 import com.threerings.gwt.util.PagedResult;
 import com.threerings.jsp.taglib.i18n.DefaultLocaleFilter;
-import com.threerings.sling.server.SlingEnvironment;
+import com.threerings.sling.server.GameActionHandler;
+import com.threerings.sling.server.GameInfoProvider;
 import com.threerings.sling.server.UserLogic.Caller;
+import com.threerings.sling.server.UserLogic;
 import com.threerings.sling.server.persist.CategoryRecord;
 import com.threerings.sling.server.persist.EventRecord;
 import com.threerings.sling.server.persist.MessageRecord;
@@ -88,16 +94,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws ServletException
     {
         super.init(config);
-
-        try {
-            // create our context and initialize our logic
-            _ctx = createEnv();
-            _ctx.user.init(_ctx);
-            log.info("Sling servlet initialized", "tz", TimeZone.getDefault());
-
-        } catch (Throwable t) {
-            log.warning("Error initializing servlet.", t);
-        }
+        log.info("Sling servlet initialized", "tz", TimeZone.getDefault());
     }
 
     // from SlingService
@@ -105,9 +102,9 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         try {
-            Caller caller = _ctx.user.userLogin(username, passwordHash, SESSION_EXPIRY_DAYS);
+            Caller caller = _userLogic.userLogin(username, passwordHash, SESSION_EXPIRY_DAYS);
             _callers.put(caller.authtok, caller);
-            Cookie cookie = new Cookie(_ctx.getSessionCookieName(), caller.authtok);
+            Cookie cookie = new Cookie(getSessionCookieName(), caller.authtok);
             cookie.setPath("/");
             cookie.setMaxAge(SESSION_EXPIRY_DAYS * 24 * 60 * 60);
             getThreadLocalResponse().addCookie(cookie);
@@ -131,8 +128,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         AuthInfo info;
-        if (!_ctx.user.refreshSession(getAuthTok(), SESSION_EXPIRY_DAYS)) {
-            String redirect = _ctx.getLoginRedirectUrl();
+        if (!_userLogic.refreshSession(getAuthTok(), SESSION_EXPIRY_DAYS)) {
+            String redirect = getLoginRedirectUrl();
             if (redirect == null) {
                 throw new SlingException("m.session_expired");
             }
@@ -154,10 +151,10 @@ public abstract class SlingServlet extends RemoteServiceServlet
         String authtok = getAuthTok();
         if (authtok != null) {
             _callers.remove(authtok);
-            CookieUtil.clearCookie(getThreadLocalResponse(), _ctx.getSessionCookieName());
-            // TODO: make _ctx.user.deleteSession and call it
+            CookieUtil.clearCookie(getThreadLocalResponse(), getSessionCookieName());
+            // TODO: make _userLogic.deleteSession and call it
         }
-        return _ctx.getLogoutRedirectUrl();
+        return getLogoutRedirectUrl();
     }
 
     // from SlingService
@@ -173,7 +170,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         if (!MailUtil.isValidAddress(email)) {
             throw new SlingException("m.invalid_email");
         }
-        _ctx.user.updateEmail(caller, email);
+        _userLogic.updateEmail(caller, email);
     }
 
     // from SlingService
@@ -181,7 +178,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         requireAuthedSupport();
-        return _ctx.user.getAccountByName(getSiteId(), accountName);
+        return _userLogic.getAccountByName(getSiteId(), accountName);
     }
 
     // from SlingService
@@ -189,7 +186,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         requireAuthedSupport();
-        return _ctx.user.getAccount(getSiteId(), name);
+        return _userLogic.getAccount(getSiteId(), name);
     }
 
     // from SlingService
@@ -211,7 +208,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         if (!allowEmailUpdate() && email != null) {
             throw new SlingException("m.internal_error");
         }
-        _ctx.user.updateAccount(accountId, email, password);
+        _userLogic.updateAccount(accountId, email, password);
     }
 
     // from SlingService
@@ -221,15 +218,15 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         Caller caller = requireAuthedSupport();
 
-        Account account = _ctx.user.updateBanned(
+        Account account = _userLogic.updateBanned(
             getSiteId(), accountId, banned, reason, untaintIdents);
         if (banned) {
-            _ctx.action.ban(account.name.accountName);
-            _ctx.action.warn(account.name.accountName, reason);
+            _actionHandler.ban(account.name.accountName);
+            _actionHandler.warn(account.name.accountName, reason);
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, account.name.accountName,
                 "Banned: \"" + reason + "\"");
         } else {
-            _ctx.action.warn(account.name.accountName, null);
+            _actionHandler.warn(account.name.accountName, null);
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, account.name.accountName,
                 "Unbanned");
         }
@@ -243,11 +240,11 @@ public abstract class SlingServlet extends RemoteServiceServlet
         Caller caller = requireAuthedSupport();
 
         if (days == 0) {
-            _ctx.action.warn(accountName, null);
+            _actionHandler.warn(accountName, null);
         } else {
             Calendar expires = Calendar.getInstance();
             expires.add(Calendar.DAY_OF_MONTH, days);
-            _ctx.action.tempBan(
+            _actionHandler.tempBan(
                 accountName, new Timestamp(expires.getTimeInMillis()), warning);
         }
 
@@ -267,14 +264,14 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         Caller caller = requireAuthedSupport();
 
-        _ctx.action.warn(accountName, warning);
+        _actionHandler.warn(accountName, warning);
 
         // record the warning
         if (warning == null) {
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, accountName, "Cleared warning");
         } else {
             String reason = "Warned for:";
-            Account account = _ctx.user.getAccountByName(getSiteId(), accountName);
+            Account account = _userLogic.getAccountByName(getSiteId(), accountName);
             if (account != null) {
                 if (account.isSet(Account.Flag.BANNED)) {
                     reason = "Changed Banned reason to:";
@@ -294,7 +291,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         requireAuthedSupport();
-        return _ctx.user.findAccountsByEmail(query);
+        return _userLogic.findAccountsByEmail(query);
     }
 
     // from SlingService
@@ -303,7 +300,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         requireAuthedSupport();
 
-        List<String> names = _ctx.info.lookupAccountNames(query);
+        List<String> names = _infoProvider.lookupAccountNames(query);
         ArrayList<AccountName> accountNames = new ArrayList<AccountName>(names.size());
         for (String name : names) {
             accountNames.add(new AccountName(name, query));
@@ -319,13 +316,13 @@ public abstract class SlingServlet extends RemoteServiceServlet
         HashIntMap<UserPetition> petitions = new HashIntMap<UserPetition>();
 
         // first load up and convert their petitions
-        for (EventRecord evrec : _ctx.urepo.loadPetitions(caller.username)) {
+        for (EventRecord evrec : _slingRepo.loadPetitions(caller.username)) {
             petitions.put(evrec.eventId, evrec.toUserPetition());
         }
 
         // next load up all messages for those petitions
         if (petitions.size() > 0) {
-            Collection<MessageRecord> msgrecs = _ctx.urepo.loadMessages(petitions.keySet());
+            Collection<MessageRecord> msgrecs = _slingRepo.loadMessages(petitions.keySet());
             Map<String, AccountName> names = resolveNames(msgrecs);
 
             // now convert the message records into
@@ -338,7 +335,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
                 Message message = msgrec.toMessage(names);
                 if (message.author != null) {
                     // these are going to normal users so convert the author info to a handle
-                    message.author = _ctx.toHandle(message.author);
+                    message.author = toHandle(message.author);
                 }
                 petition.messages.add(message);
             }
@@ -387,18 +384,18 @@ public abstract class SlingServlet extends RemoteServiceServlet
         switch (criterion) {
         default:
         case OPEN:
-            pagedQuery = _ctx.urepo.loadOpenEvents();
+            pagedQuery = _slingRepo.loadOpenEvents();
             noteAgentActivity(caller.username);
             break;
         case MY:
-            pagedQuery = _ctx.urepo.loadClaimedEvents(caller.username);
+            pagedQuery = _slingRepo.loadClaimedEvents(caller.username);
             break;
         case ALL:
-            pagedQuery = _ctx.urepo.loadAllEvents();
+            pagedQuery = _slingRepo.loadAllEvents();
             break;
         case ACCOUNT:
             // query is an account name in this case
-            pagedQuery = _ctx.urepo.loadEvents(query);
+            pagedQuery = _slingRepo.loadEvents(query);
             break;
         }
 
@@ -421,7 +418,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             EventFilter filter = search.filters.get(ii);
             if (filter.type == EventFilter.Type.OWNER_ID_IS) {
                 int ownerId = filter.getOwnerId();
-                Account owner = _ctx.user.getAccountById(getSiteId(), ownerId);
+                Account owner = _userLogic.getAccountById(getSiteId(), ownerId);
                 if (owner == null) {
                     throw new SlingException("m.no_such_user");
                 }
@@ -435,7 +432,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             }
         }
 
-        SlingRepository.PagedQuery<EventRecord> query = _ctx.urepo.searchEvents(search);
+        SlingRepository.PagedQuery<EventRecord> query = _slingRepo.searchEvents(search);
 
         if (query == null) {
             throw new SlingException("m.invalid_search");
@@ -457,9 +454,9 @@ public abstract class SlingServlet extends RemoteServiceServlet
         EventSearch search = new EventSearch(
             EventFilter.createdIn(range),
             EventFilter.typeIs(type));
-        result.total = _ctx.urepo.searchEvents(search).count();
+        result.total = _slingRepo.searchEvents(search).count();
         search.filters.add(EventFilter.firstResponseIsMoreThan(firstResponseMillis));
-        result.qualified = result.total - _ctx.urepo.searchEvents(search).count();
+        result.qualified = result.total - _slingRepo.searchEvents(search).count();
         return result;
     }
 
@@ -497,7 +494,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         volume.begin = UniversalTime.fromDate(d1.getTime());
         volume.eventCounts = new int[count];
         for (int ii = 0; ii < count; ++ii) {
-            volume.eventCounts[ii] = _ctx.urepo.searchEvents(new EventSearch(
+            volume.eventCounts[ii] = _slingRepo.searchEvents(new EventSearch(
                 EventFilter.createdIn(new TimeRange(
                     UniversalTime.fromDate(d1.getTime()),
                     UniversalTime.fromDate(d2.getTime()))),
@@ -532,7 +529,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         }
 
         // load the data
-        int[][] eventCounts = _ctx.urepo.getVolumeByDayAndHour(range.from, range.to, types);
+        int[][] eventCounts = _slingRepo.getVolumeByDayAndHour(range.from, range.to, types);
 
         // calculate averages
         float[][] averages = new float[7][];
@@ -553,7 +550,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         requireAuthedSupport();
-        return _ctx.urepo.getAgentActivity();
+        return _slingRepo.getAgentActivity();
     }
 
     // from SlingService
@@ -561,7 +558,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         requireAuthedSupport();
-        EventRecord evrec = _ctx.urepo.loadEvent(eventId);
+        EventRecord evrec = _slingRepo.loadEvent(eventId);
         if (evrec == null) {
             return null;
         }
@@ -569,7 +566,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         accounts.add(evrec.source);
         accounts.add(evrec.target);
         accounts.add(evrec.owner);
-        Map<String, AccountName> names = _ctx.user.resolveNames(accounts);
+        Map<String, AccountName> names = _userLogic.resolveNames(accounts);
         Event event = evrec.toEvent(names);
         dbgLog("Event.entered", event.entered);
         return event;
@@ -583,7 +580,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
 
         ArrayList<Integer> ids = new ArrayList<Integer>();
         ids.add(eventId);
-        Collection<MessageRecord> msgrecs = _ctx.urepo.loadMessages(ids);
+        Collection<MessageRecord> msgrecs = _slingRepo.loadMessages(ids);
         Map<String, AccountName> names = resolveNames(msgrecs);
         ArrayList<Message> msgs = new ArrayList<Message>();
         for (MessageRecord msgrec : msgrecs) {
@@ -629,7 +626,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         }
 
         // now update the persistent event record
-        _ctx.urepo.updateEvent(event.eventId, status, newOwner);
+        _slingRepo.updateEvent(event.eventId, status, newOwner);
 
         // add a message to log the change
         MessageRecord msgrec = new MessageRecord();
@@ -637,17 +634,17 @@ public abstract class SlingServlet extends RemoteServiceServlet
         msgrec.author = caller.username;
         msgrec.access = Message.Access.SUPPORT;
         msgrec.text = message.toString();
-        _ctx.urepo.insertMessage(msgrec, false);
+        _slingRepo.insertMessage(msgrec, false);
 
         // update the first reponse if this message is closing the complaint
         if (!status.isOpen() && event.firstResponse == null && event.type == Event.Type.COMPLAINT) {
             event.firstResponse = msgrec.entered.getTime() - event.entered.getTime();
-            _ctx.urepo.updateFirstResponse(event);
+            _slingRepo.updateFirstResponse(event);
         }
 
         Message msg = msgrec.toMessage(resolveNames(Collections.singleton(msgrec)));
         if (!caller.isSupport) {
-            msg.author = _ctx.toHandle(msg.author);
+            msg.author = toHandle(msg.author);
         }
         return msg;
     }
@@ -663,7 +660,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             throw new SlingException("e.invalid_state");
         }
 
-        _ctx.urepo.setWaitingForPlayer(eventId, waitingForPlayer);
+        _slingRepo.setWaitingForPlayer(eventId, waitingForPlayer);
 
         // add a message to log the change
         MessageRecord msgrec = new MessageRecord();
@@ -671,11 +668,11 @@ public abstract class SlingServlet extends RemoteServiceServlet
         msgrec.author = caller.username;
         msgrec.access = Message.Access.SUPPORT;
         msgrec.text = (waitingForPlayer ? "Set" : "Cleared") + " waiting for player";
-        _ctx.urepo.insertMessage(msgrec, false);
+        _slingRepo.insertMessage(msgrec, false);
 
         Message msg = msgrec.toMessage(resolveNames(Collections.singleton(msgrec)));
         if (!caller.isSupport) {
-            msg.author = _ctx.toHandle(msg.author);
+            msg.author = toHandle(msg.author);
         }
         return msg;
     }
@@ -692,11 +689,11 @@ public abstract class SlingServlet extends RemoteServiceServlet
         }
 
         // check language is supported, explicitly allow null
-        if (language != null && !_ctx.getSupportedLanguages().contains(language)) {
+        if (language != null && !getSupportedLanguages().contains(language)) {
             throw new SlingException("e.language_not_supported");
         }
 
-        _ctx.urepo.setLanguage(eventId, language);
+        _slingRepo.setLanguage(eventId, language);
 
         // add a message to log the change
         MessageRecord msgrec = new MessageRecord();
@@ -704,7 +701,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         msgrec.author = caller.username;
         msgrec.access = Message.Access.SUPPORT;
         msgrec.text = "Changed language from " + event.language + " to " + language;
-        _ctx.urepo.insertMessage(msgrec, false);
+        _slingRepo.insertMessage(msgrec, false);
 
         return msgrec.toMessage(resolveNames(Collections.singleton(msgrec)));
     }
@@ -727,8 +724,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
 
         String ownerUsername = event.owner;
         AccountName owner = null;
-        for (String name : _ctx.info.lookupAccountNames(gameName)) {
-            String username = _ctx.user.getSupportUsername(name);
+        for (String name : _infoProvider.lookupAccountNames(gameName)) {
+            String username = _userLogic.getSupportUsername(name);
             if (username != null) {
                 ownerUsername = username;
                 owner = new AccountName(name, gameName);
@@ -741,7 +738,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         }
 
         // now update the persistent event record
-        _ctx.urepo.updateEvent(event.eventId, status, ownerUsername);
+        _slingRepo.updateEvent(event.eventId, status, ownerUsername);
 
         // add a message to log this assignment
         MessageRecord msgrec = new MessageRecord();
@@ -750,7 +747,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         msgrec.access = Message.Access.SUPPORT;
         msgrec.text = "Status changed to " + status +
             "Owner changed to " + owner.accountName + "\n";
-        _ctx.urepo.insertMessage(msgrec, false);
+        _slingRepo.insertMessage(msgrec, false);
 
         // return the result
         AssignEventResult ret = new AssignEventResult();
@@ -804,7 +801,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         msgrec.author = caller.username;
         msgrec.text = message;
         msgrec.access = access;
-        _ctx.urepo.insertMessage(msgrec, isReply || event.type != Event.Type.PETITION);
+        _slingRepo.insertMessage(msgrec, isReply || event.type != Event.Type.PETITION);
 
         PostMessageResult result = new PostMessageResult();
 
@@ -812,9 +809,9 @@ public abstract class SlingServlet extends RemoteServiceServlet
         if (updateWaitingFlag) {
             if (!event.waitingForPlayer && caller.isSupport &&
                     access == Message.Access.NORMAL) {
-                _ctx.urepo.setWaitingForPlayer(event.eventId, result.waitingForPlayer = true);
+                _slingRepo.setWaitingForPlayer(event.eventId, result.waitingForPlayer = true);
             } else if (event.waitingForPlayer && isOwner) {
-                _ctx.urepo.setWaitingForPlayer(event.eventId, result.waitingForPlayer = false);
+                _slingRepo.setWaitingForPlayer(event.eventId, result.waitingForPlayer = false);
             }
         }
 
@@ -822,24 +819,24 @@ public abstract class SlingServlet extends RemoteServiceServlet
         // complaint, init the first response field
         if (event.firstResponse == null && (isReply || event.type == Event.Type.COMPLAINT)) {
             event.firstResponse = msgrec.entered.getTime() - event.entered.getTime();
-            _ctx.urepo.updateFirstResponse(event);
+            _slingRepo.updateFirstResponse(event);
         }
 
         // if this is a reply to a non-anonymous user petition, send a message to the user
         if (isReply && event.source.length() != 0) {
             // don't crash if send fails, just return the error string
             try {
-                _ctx.action.sendMessage(caller.username, event.source, event.sourceHandle,
+                _actionHandler.sendMessage(caller.username, event.source, event.sourceHandle,
                     event.subject);
             } catch (SlingException e) {
                 result.sendError = e.getMessage();
             }
         }
 
-        result.message = msgrec.toMessage(_ctx.user.resolveNames(
+        result.message = msgrec.toMessage(_userLogic.resolveNames(
             Collections.singleton(caller.username)));
         if (!caller.isSupport) {
-            result.message.author = _ctx.toHandle(result.message.author);
+            result.message.author = toHandle(result.message.author);
         }
 
         return result;
@@ -852,7 +849,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         requireAuthedSupport();
 
         // update the persistent store
-        _ctx.user.updateIdentBanned(getSiteId(), machIdent, banned);
+        _userLogic.updateIdentBanned(getSiteId(), machIdent, banned);
 
         // update the cache
         updateRelatedAccounts(machIdent, null, banned);
@@ -865,7 +862,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         requireAuthedSupport();
 
         // update the persistent store
-        _ctx.user.updateIdentTainted(getSiteId(), machIdent, tainted);
+        _userLogic.updateIdentTainted(getSiteId(), machIdent, tainted);
 
         // update the cache
         updateRelatedAccounts(machIdent, tainted, null);
@@ -884,7 +881,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         requireAuthedSupport();
         CategoryRecord record = new CategoryRecord(category);
-        _ctx.urepo.storeCategory(record);
+        _slingRepo.storeCategory(record);
         _faqs.clear();
         return record.categoryId;
     }
@@ -895,7 +892,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         requireAuthedSupport();
         QuestionRecord record = new QuestionRecord(question);
-        _ctx.urepo.storeQuestion(record);
+        _slingRepo.storeQuestion(record);
         _faqs.clear();
         return record.questionId;
     }
@@ -913,13 +910,83 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     /**
-     * Creates the environment we'll use to obtain all of our services and configuration.
+     * Returns the name of the session cookie set when a user logs in and clear when they log out.
+     * The cookie value is a session id value from the user db sessions table. By default, a sling
+     * standalone mode cookie name is returned. Override to share authentication state with
+     * another webapp.
      */
-    protected abstract SlingEnvironment createEnv ();
+    protected String getSessionCookieName ()
+    {
+        return "slingtok";
+    }
+
+    /**
+     * Returns the equivalent of the given name but without any deleted game names.
+     * @see GameInfoProvider#isDeleted(String)
+     */
+    protected AccountName withoutDeletedGameNames (AccountName name)
+    {
+        if (Iterables.all(name.gameNames, _notDeleted)) {
+            return name;
+        }
+
+        return new AccountName(name.accountName,
+                Lists.newArrayList(Iterables.filter(name.gameNames, _notDeleted)));
+    }
+
+    /**
+     * Converts an account name to a name to be used for displaying replies to user petitions.
+     * By default, omits the account name and keeps all the undeleted game names.
+     */
+    protected AccountName toHandle (AccountName name)
+    {
+        return withoutDeletedGameNames(new AccountName("", name.gameNames));
+    }
+
+    /**
+     * Returns a URL to redirect the user to if a page is requested that requires a session and
+     * the user is not logged in. By default, returns null, which causes the sling client to
+     * display a standalone sling login page. Override to redirect to a main login page.
+     */
+    protected String getLoginRedirectUrl ()
+    {
+        return null;
+    }
+
+    /**
+     * Returns a URL to redirect the user to when a logout is requested. By default, returns
+     * null, which causes the sling client to display a standalone sling login page. Override to
+     * redirect to a main logout page.
+     */
+    protected String getLogoutRedirectUrl ()
+    {
+        return null;
+    }
+
+    /**
+     * Returns the default language to use for events created by the servlet, if none could be
+     * determined from other information. Note that for sling, languages are two letter codes.
+     * By default, returns the code for English, "en".
+     */
+    protected String getDefaultLanguage ()
+    {
+        return "en";
+    }
+
+    /**
+     * Returns the languages that may be used by the servlet when creating events. If a user's
+     * language is set to a value not in this set, the default will be used. The set must always
+     * contain the value returned by {@link #getDefaultLanguage()}. Note that for sling, languages
+     * are two letter codes. By default, returns the singleton containing the default language.
+     */
+    protected Set<String> getSupportedLanguages ()
+    {
+        return Collections.singleton(getDefaultLanguage());
+    }
 
     protected String getAuthTok ()
     {
-        return CookieUtil.getCookieValue(getThreadLocalRequest(), _ctx.getSessionCookieName());
+        return CookieUtil.getCookieValue(getThreadLocalRequest(), getSessionCookieName());
     }
 
     /**
@@ -936,7 +1003,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
      */
     protected int getSiteId ()
     {
-        int siteId = _ctx.site.identifySite(getThreadLocalRequest());
+        int siteId = _siteIdentifier.identifySite(getThreadLocalRequest());
         if (siteId == -1) {
             siteId = OOOUser.BANGHOWDY_SITE_ID; // use Bang when testing
         }
@@ -946,13 +1013,13 @@ public abstract class SlingServlet extends RemoteServiceServlet
     protected AuthInfo createAuthInfo (Caller caller)
         throws SlingException
     {
-        _ctx.user.resolveName(caller.username);
+        _userLogic.resolveName(caller.username);
         AuthInfo ainfo = new AuthInfo();
-        ainfo.name = _ctx.withoutDeletedGameNames(_ctx.user.resolveName(caller.username));
+        ainfo.name = withoutDeletedGameNames(_userLogic.resolveName(caller.username));
         ainfo.email = caller.email;
         ainfo.isAdmin = caller.isSupport;
         if (ainfo.isAdmin) {
-            String site = _ctx.site.getSiteString(getSiteId());
+            String site = _siteIdentifier.getSiteString(getSiteId());
             ainfo.setUrl(AuthUrl.GAME, OOOConfig.getGameInfoURL(site));
             ainfo.setUrl(AuthUrl.BILLING, OOOConfig.getBillingInfoURL(site));
         }
@@ -973,7 +1040,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         for (MessageRecord msgrec : msgrecs) {
             accounts.add(msgrec.author);
         }
-        return _ctx.user.resolveNames(accounts);
+        return _userLogic.resolveNames(accounts);
     }
 
     protected Caller requireAuthedUser ()
@@ -1004,7 +1071,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     protected EventRecord requireEvent (int eventId)
         throws SlingException
     {
-        EventRecord event = _ctx.urepo.loadEvent(eventId);
+        EventRecord event = _slingRepo.loadEvent(eventId);
         if (event == null) {
             throw new SlingException("m.no_such_event");
         }
@@ -1031,11 +1098,11 @@ public abstract class SlingServlet extends RemoteServiceServlet
         msgrec.access = Message.Access.NORMAL;
 
         // add the event record
-        _ctx.urepo.insertEvent(evrec);
+        _slingRepo.insertEvent(evrec);
 
         // and the initial message record
         msgrec.eventId = evrec.eventId;
-        _ctx.urepo.insertMessage(msgrec, false);
+        _slingRepo.insertMessage(msgrec, false);
 
         return evrec.eventId;
     }
@@ -1061,7 +1128,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         fillSessionInfo(evrec);
 
         // add the event record
-        _ctx.urepo.insertEvent(evrec);
+        _slingRepo.insertEvent(evrec);
     }
 
     protected PagedResult<Event> toResult(
@@ -1080,7 +1147,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             accounts.add(event.target);
             accounts.add(event.owner);
         }
-        Map<String, AccountName> names = _ctx.user.resolveNames(accounts);
+        Map<String, AccountName> names = _userLogic.resolveNames(accounts);
 
         result.page = Lists.newArrayListWithExpectedSize(evrecs.size());
         for (EventRecord event : evrecs) {
@@ -1129,23 +1196,23 @@ public abstract class SlingServlet extends RemoteServiceServlet
         Locale locale = (Locale)req.getSession().getAttribute(
             DefaultLocaleFilter.LOCALE_ATTRIBUTE);
         if (locale == null) {
-            return _ctx.getDefaultLanguage();
+            return getDefaultLanguage();
         }
         String lang = locale.getLanguage();
         if (lang == null) {
-            return _ctx.getDefaultLanguage();
+            return getDefaultLanguage();
         }
-        if (_ctx.getSupportedLanguages().contains(lang)) {
+        if (getSupportedLanguages().contains(lang)) {
             return lang;
         }
         int underscore = lang.indexOf('_');
         if (underscore == 2) {
             lang = lang.substring(0, underscore);
-            if (_ctx.getSupportedLanguages().contains(lang)) {
+            if (getSupportedLanguages().contains(lang)) {
                 return lang;
             }
         }
-        return _ctx.getDefaultLanguage();
+        return getDefaultLanguage();
     }
 
     /**
@@ -1157,7 +1224,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         if (time != null && System.currentTimeMillis() - time < 5 * 60 * 1000L) {
             return;
         }
-        long now = _ctx.urepo.noteAgentActivity(accountName);
+        long now = _slingRepo.noteAgentActivity(accountName);
         _activityWriteCache.put(accountName, now);
     }
 
@@ -1182,13 +1249,23 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     /** Provides access to all of our dependencies. */
-    protected SlingEnvironment _ctx;
+    @Inject protected UserLogic _userLogic;
+    @Inject protected GameActionHandler _actionHandler;
+    @Inject protected GameInfoProvider _infoProvider;
+    @Inject protected SlingRepository _slingRepo;
+    @Inject protected SiteIdentifier _siteIdentifier;
+
+    protected final Predicate<String> _notDeleted = new Predicate<String> () {
+        public boolean apply (String name) {
+            return !_infoProvider.isDeleted(name);
+        }
+    };
 
     /** A cache of authenticated users. */
     protected SimpleCache<String, Caller> _callers =
             new SimpleCache<String, Caller>(GENERAL_REFRESH_INTERVAL) {
         @Override protected Caller compute (String authtok) throws SlingException {
-            Caller caller = _ctx.user.loadCaller(authtok);
+            Caller caller = _userLogic.loadCaller(authtok);
             if (caller == null) {
                 throw new AuthenticationException("m.session_expired");
             }
@@ -1202,7 +1279,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             new SimpleCache<Integer, List<MachineIdentity>>(GENERAL_REFRESH_INTERVAL) {
         @Override protected List<MachineIdentity> compute (Integer accountId)
             throws SlingException {
-            return _ctx.user.getRelatedAccounts(getSiteId(), accountId);
+            return _userLogic.getRelatedAccounts(getSiteId(), accountId);
         }
     };
 
@@ -1214,12 +1291,12 @@ public abstract class SlingServlet extends RemoteServiceServlet
 
             // first load our categories
             HashIntMap<Category> cats = new HashIntMap<Category>();
-            for (CategoryRecord cat : _ctx.urepo.loadCategories()) {
+            for (CategoryRecord cat : _slingRepo.loadCategories()) {
                 cats.put(cat.categoryId, cat.toCategory());
             }
 
             // then map our questions to the categories
-            for (QuestionRecord quest : _ctx.urepo.loadQuestions()) {
+            for (QuestionRecord quest : _slingRepo.loadQuestions()) {
                 Category cat = cats.get(quest.categoryId);
                 if (cat == null) {
                     log.warning("Question mapped to non-existent category! " + quest + ".");

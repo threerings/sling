@@ -8,34 +8,35 @@ import java.sql.Timestamp;
 import com.threerings.sling.web.client.SlingException;
 
 /**
- * Provides game-specific action handling to our support system.
+ * Provides game-specific action handling to our support system. The application is expected to
+ * bind an instance of this or else guice will complain.
  */
-public abstract class GameActionHandler
+public interface GameActionHandler
 {
     /**
      * Performs game-side banning of an account.  The account will be banned on the site, but this
      * allows the game to boot the player from the server if they're active.
      */
-    public abstract void ban (String accountName)
+    void ban (String accountName)
         throws SlingException;
 
     /**
      * Puts a temporary ban on the account.
      */
-    public abstract void tempBan (String accountName, Timestamp expires, String warning)
+    void tempBan (String accountName, Timestamp expires, String warning)
         throws SlingException;
 
     /**
      * Changes the warning message on the account.
      */
-    public abstract void warn (String accountName, String warning)
+    void warn (String accountName, String warning)
         throws SlingException;
 
     /**
      * Sends a message telling the account there's an update to their support request.
-     * @throws SlingException 
+     * @throws SlingException
      */
-    public abstract void sendMessage (String senderAccount, String recipAccount,
+    void sendMessage (String senderAccount, String recipAccount,
         String recipHandle, String message)
         throws SlingException;
 }

@@ -6,32 +6,29 @@ package com.threerings.sling.server;
 import java.sql.Timestamp;
 
 /**
- * Performs no game-specific actions.
+ * Performs no game-specific actions. This is just a class to make testing easier.
  */
-public class DummyGameActionHandler extends GameActionHandler
+public class AbstractGameActionHandler
+    implements GameActionHandler
 {
     @Override // from GameActionHandler
     public void ban (String accountName)
     {
-        // nothing doing
     }
 
     @Override // from GameActionHandler
     public void tempBan (String accountName, Timestamp expires, String warning)
     {
-        // nothing doing
     }
 
     @Override // from GameActionHandler
     public void warn (String accountName, String warning)
     {
-        // nothing doing
     }
 
     @Override // from GameActionHandler
     public void sendMessage (String senderAccount, String recipAccount,
         String recipHandle, String message)
     {
-        // nothing doing
     }
 }

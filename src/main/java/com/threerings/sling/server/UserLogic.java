@@ -15,29 +15,27 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.google.common.base.Predicates;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
-import com.samskivert.io.PersistenceException;
 import com.samskivert.net.MailUtil;
 import com.samskivert.util.Comparators;
 import com.samskivert.util.Tuple;
 
+import com.samskivert.servlet.SiteIdentifier;
 import com.samskivert.servlet.user.AuthenticationFailedException;
 import com.samskivert.servlet.user.InvalidPasswordException;
 import com.samskivert.servlet.user.Password;
-import com.samskivert.servlet.user.User;
-import com.samskivert.servlet.user.UserRepository;
 
-import com.samskivert.jdbc.ConnectionProvider;
-
+import com.samskivert.depot.DatabaseException;
 import com.samskivert.depot.PersistenceContext;
 
-import com.threerings.sling.server.persist.DepotUserSupportRepository;
-import com.threerings.sling.server.persist.OOOUserSupportRepository;
-import com.threerings.sling.server.persist.UserSupportRepository;
 import com.threerings.sling.web.client.SlingException;
 import com.threerings.sling.web.data.Account;
 import com.threerings.sling.web.data.AccountName;
@@ -47,7 +45,6 @@ import com.threerings.sling.web.util.CacheEntry;
 import com.threerings.sling.web.util.CacheEntryMap;
 import com.threerings.user.OOOUser;
 import com.threerings.user.OOOUserCard;
-import com.threerings.user.OOOUserManager;
 import com.threerings.user.depot.DepotUserManager;
 import com.threerings.user.depot.DepotUserRepository;
 
@@ -56,6 +53,7 @@ import static com.threerings.sling.Log.log;
 /**
  * Provides user-related logic neeed by the servlet.
  */
+@Singleton
 public class UserLogic
 {
     /** Used to manage authentication. */
@@ -68,104 +66,37 @@ public class UserLogic
     }
 
     /**
-     * Defines the method for starting a new user session. Normally defers to a user manager, which
-     * is responsible for authentication.
+     * Creates a new user logic. Note that the application must bind the named properties to a
+     * suitable instance.
      */
-    public interface LoginHandler
+    @Inject public UserLogic (final @Named("com.threerings.oooauth") Properties conf,
+        final PersistenceContext pctx)
     {
-        /**
-         * Authenticates and creates a session for the the given username and password. The user
-         * object is returned with an authentication token in a tuple. The token is valid for the
-         * requested number of days. The client should store the token and pass it with subsequent
-         * requests.
-         * @see UserLogic#loadCaller()
-         * @return tuple with the user that just logged in and the session token
-         */
-        Tuple<OOOUser,String> login (String username, String password, int expireDays)
-            throws AuthenticationFailedException, InvalidPasswordException;
-    }
-
-    /**
-     * Create a new user logic that will defer to a ooo user database for persistence.
-     * @see OOOUserSupportRepository
-     * @see OOOUserManager
-     */
-    public static UserLogic newOOOUserLogic (ConnectionProvider conprov, Properties oooconf)
-    {
-        try {
-            final OOOUserSupportRepository repo = new OOOUserSupportRepository(conprov);
-            final OOOUserManager mgr = new OOOUserManager(oooconf, conprov) {
-                @Override protected UserRepository createRepository (ConnectionProvider conprov)
-                    throws PersistenceException {
-                    return repo.getDelegate();
+        // this needs to be a supplier so we can properly nest our _userRepo in there later
+        // TODO: make ooo-user lib guice compatible? this code is bending over backwards to \
+        // "inject" by overriding a method (furthermore the method is named "create", which \
+        // is not what its override is doing).
+        _userMgr = new Supplier<DepotUserManager> () {
+            DepotUserManager mgr;
+            @Override public DepotUserManager get () {
+                if (mgr == null) {
+                    mgr = new DepotUserManager(conf, pctx) {
+                        @Override protected DepotUserRepository createRepository (
+                                PersistenceContext pctx) throws DatabaseException {
+                            // not creating! using an injected instance from parent class
+                            return _userRepo;
+                        }
+                    };
                 }
-            };
-            LoginHandler loginHandler = new LoginHandler() {
-                @Override public Tuple<OOOUser,String> login (
-                        String username, String password, int expireDays)
-                    throws AuthenticationFailedException, InvalidPasswordException
-                {
-                    try {
-                        Tuple<User, String> bits = mgr.login(username,
-                            Password.makeFromCrypto(password), expireDays,
-                            OOOUserManager.AUTH_PASSWORD);
-                        return new Tuple<OOOUser, String>((OOOUser)bits.left, bits.right);
-                    } catch (PersistenceException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            };
-
-            return new UserLogic(repo, loginHandler);
-
-        } catch (PersistenceException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Create a new user logic that will defer to a depot user database for persistence.
-     * @see DepotUserSupportRepository
-     * @see DepotUserManager
-     */
-    public static UserLogic newDepotUserLogic (PersistenceContext pctx, Properties oooconf)
-    {
-        final DepotUserSupportRepository repo = new DepotUserSupportRepository(pctx);
-        final DepotUserManager mgr = new DepotUserManager(oooconf, pctx) {
-            @Override protected DepotUserRepository createRepository (PersistenceContext pctx) {
-                return repo.getDelegate();
+                return mgr;
             }
         };
-        LoginHandler loginHandler = new LoginHandler() {
-            @Override public Tuple<OOOUser,String> login (
-                    String username, String password, int expireDays)
-                throws AuthenticationFailedException, InvalidPasswordException
-            {
-                return mgr.login(username, Password.makeFromCrypto(password),
-                    expireDays, DepotUserManager.AUTH_PASSWORD);
-            }
-        };
-        return new UserLogic(repo, loginHandler);
-    }
-
-    /**
-     * Creates a new user logic using the given repo and login handler.
-     */
-    public UserLogic (UserSupportRepository supportRepo, LoginHandler loginHandler)
-    {
-        _supportrepo = supportRepo;
-        _loginHandler = loginHandler;
-    }
-
-    public void init (SlingEnvironment ctx)
-    {
-        _ctx = ctx;
     }
 
     public Caller loadCaller (String authtok)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUserBySession(authtok);
+        OOOUser user = _userRepo.loadUserBySession(authtok);
         if (user == null) {
             return null;
         }
@@ -181,7 +112,8 @@ public class UserLogic
     public Caller userLogin (String username, String password, int expireDays)
         throws AuthenticationFailedException, InvalidPasswordException
     {
-        Tuple<OOOUser, String> bits = _loginHandler.login(username, password, expireDays);
+        Tuple<OOOUser, String> bits = _userMgr.get().login(username,
+            Password.makeFromCrypto(password), expireDays, DepotUserManager.AUTH_PASSWORD);
         Caller caller = new Caller();
         caller.authtok = bits.right;
         caller.username = bits.left.username;
@@ -193,37 +125,37 @@ public class UserLogic
     public String getSupportUsername (String accountName)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUserByAccountName(accountName);
+        OOOUser user = _userRepo.loadUser(accountName, false);
         return (user == null) ? null : getUsername(user);
     }
 
     public boolean refreshSession (String sessionKey, int expireDays)
     {
-        return _supportrepo.refreshSession(sessionKey, expireDays);
+        return _userRepo.refreshSession(sessionKey, expireDays);
     }
 
     public void updateEmail (Caller caller, String email)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUserByAccountName(caller.username);
+        OOOUser user = _userRepo.loadUser(caller.username, false);
         if (user == null) {
             throw new SlingException("m.internal_error");
         }
         setUserEmail(user, email);
-        _supportrepo.updateUser(user);
+        _userRepo.updateUser(user);
     }
 
     public Account getAccountByName (int siteId, String accountName)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUserByAccountName(accountName);
+        OOOUser user = _userRepo.loadUser(accountName, false);
         return (user == null) ? null : toAccount(siteId, user);
     }
 
     public Account getAccount (int siteId, String name)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUser(name, false);
+        OOOUser user = _userRepo.loadUser(name, false);
         if (user == null) {
             return null;
         }
@@ -233,7 +165,7 @@ public class UserLogic
     public Account getAccountById (int siteId, int userId)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUser(userId);
+        OOOUser user = _userRepo.loadUser(userId);
         if (user == null) {
             return null;
         }
@@ -243,27 +175,27 @@ public class UserLogic
     public List<MachineIdentity> getRelatedAccounts (int siteId, int accountId)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUser(accountId);
+        OOOUser user = _userRepo.loadUser(accountId);
         if (user == null) {
             throw new SlingException("m.unknown_user");
         }
-        _supportrepo.loadMachineIdents(user);
+        _userRepo.loadMachineIdents(user);
 
         if (user.machIdents.length == 0) {
             return Lists.newArrayList();
         }
 
         // determine which are tainted
-        Collection<String> tainted = _supportrepo.filterTaintedIdents(user.machIdents);
+        Collection<String> tainted = _userRepo.filterTaintedIdents(user.machIdents);
 
         // determine which are banned
-        Collection<String> banned = _supportrepo.filterBannedIdents(user.machIdents, siteId);
+        Collection<String> banned = _userRepo.filterBannedIdents(user.machIdents, siteId);
 
         // collect all account names and a list of related accounts for each ident
         Set<String> names = new HashSet<String>();
         Map<String, List<OOOUserCard>> cardsForIdents = Maps.newHashMap();
         for (String id : user.machIdents) {
-            List<OOOUserCard> idNames = Lists.newArrayList(_supportrepo.getUsersOfMachIdent(id));
+            List<OOOUserCard> idNames = Lists.newArrayList(_userRepo.getUsersOfMachIdentCards(id));
             cardsForIdents.put(id, idNames);
             names.addAll(Lists.transform(idNames, OOOUserCard.TO_USERNAME));
         }
@@ -272,7 +204,7 @@ public class UserLogic
         byte bannedToken = OOOUser.getBannedToken(siteId);
         Set<String> bannedNames = Collections.emptySet();
         if (bannedToken > 0) {
-            bannedNames = Sets.newHashSet(_supportrepo.getTokenUsernames(names, bannedToken));
+            bannedNames = Sets.newHashSet(_userRepo.getTokenUsernames(names, bannedToken));
         }
 
         // convert games names to "usernames"
@@ -317,7 +249,7 @@ public class UserLogic
     public void updateAccount (int accountId, String email, String password)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUser(accountId);
+        OOOUser user = _userRepo.loadUser(accountId);
         if (user == null) {
             throw new SlingException("m.unknown_user");
         }
@@ -331,7 +263,7 @@ public class UserLogic
         if (password != null) {
             user.setPassword(Password.makeFromCrypto(password));
         }
-        if (!_supportrepo.updateUser(user)) {
+        if (!_userRepo.updateUser(user)) {
             throw new SlingException("m.user_update_error");
         }
     }
@@ -340,7 +272,7 @@ public class UserLogic
                                  boolean untaintIdents)
         throws SlingException
     {
-        OOOUser user = _supportrepo.loadUser(accountId);
+        OOOUser user = _userRepo.loadUser(accountId);
         if (user == null) {
             throw new SlingException("m.unknown_user");
         }
@@ -348,9 +280,9 @@ public class UserLogic
         Account account = toAccount(siteId, user);
         boolean updated;
         if (banned) {
-            updated = _supportrepo.ban(siteId, user.username);
+            updated = _userRepo.ban(siteId, user.username);
         } else {
-            updated = _supportrepo.unban(siteId, user.username, untaintIdents);
+            updated = _userRepo.unban(siteId, user.username, untaintIdents);
         }
 
         // the only way we could fail here is if we're trying to ban someone on a site for which we
@@ -367,7 +299,7 @@ public class UserLogic
     {
         // build a map of matching emails to account names
         HashMap<String, String> names = Maps.newHashMap();
-        for (String username : _supportrepo.getUsernames(query)) {
+        for (String username : _userRepo.getUsernames(query)) {
             names.put(username, getUsername(username)); // may be null-valued
         }
 
@@ -388,18 +320,18 @@ public class UserLogic
     public void updateIdentBanned (int siteId, String machIdent, boolean banned)
     {
         if (banned) {
-            _supportrepo.addBannedIdent(machIdent, siteId);
+            _userRepo.addBannedIdent(machIdent, siteId);
         } else {
-            _supportrepo.removeBannedIdent(machIdent, siteId);
+            _userRepo.removeBannedIdent(machIdent, siteId);
         }
     }
 
     public void updateIdentTainted (int siteId, String machIdent, boolean tainted)
     {
         if (tainted) {
-            _supportrepo.addTaintedIdent(machIdent);
+            _userRepo.addTaintedIdent(machIdent);
         } else {
-            _supportrepo.removeTaintedIdent(machIdent);
+            _userRepo.removeTaintedIdent(machIdent);
         }
     }
 
@@ -418,7 +350,7 @@ public class UserLogic
 
         if (toResolve.size() > 0) {
             ArrayListMultimap<String, String> gameNames = ArrayListMultimap.create();
-            _ctx.info.resolveGameNames(toResolve, gameNames);
+            _infoProvider.resolveGameNames(toResolve, gameNames);
 
             for (String account : toResolve) {
                 List<String> gameNamesEntry = Lists.newArrayList(gameNames.get(account));
@@ -470,7 +402,7 @@ public class UserLogic
         account.name = resolveName(username);
         account.email = user.email;
         account.created = UniversalTime.fromDate(user.created);
-        account.affiliate = _ctx.site.getSiteString(user.siteId);
+        account.affiliate = _siteIdentifier.getSiteString(user.siteId);
 
         account.set(Account.Flag.HAS_BOUGHT_COINS, user.hasBoughtCoins());
         account.set(Account.Flag.HAS_BOUGHT_TIME, user.hasBoughtTime());
@@ -504,7 +436,7 @@ public class UserLogic
         }
 
         // populate the game specific bits
-        _ctx.info.populateAccount(account);
+        _infoProvider.populateAccount(account);
 
         // TODO: cache the results?
 
@@ -550,19 +482,19 @@ public class UserLogic
     protected Comparator<String> _sortGameNames = new Comparator<String>() {
         @Override public int compare (String gn1, String gn2) {
             int cmp = Comparators.compare(
-                    _ctx.info.isDeleted(gn1), _ctx.info.isDeleted(gn2));
+                _infoProvider.isDeleted(gn1), _infoProvider.isDeleted(gn2));
             return cmp == 0 ? gn1.compareTo(gn2) : cmp;
         }
     };
 
-    protected SlingEnvironment _ctx;
+    @Inject protected GameInfoProvider _infoProvider;
+    @Inject protected DepotUserRepository _userRepo;
+    @Inject protected SiteIdentifier _siteIdentifier;
+
+    protected Supplier<DepotUserManager> _userMgr;
 
     /** A cache of resolved account names. */
     protected CacheEntryMap<String, AccountName> _names = CacheEntryMap.makeNew();
-
-    protected LoginHandler _loginHandler;
-
-    protected UserSupportRepository _supportrepo;
 
     protected static final int OOOUSER_PAID_MASK =
         OOOUser.HAS_BOUGHT_COINS_FLAG | OOOUser.HAS_BOUGHT_TIME_FLAG;

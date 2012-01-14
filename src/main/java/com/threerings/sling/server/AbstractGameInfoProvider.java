@@ -11,9 +11,10 @@ import com.google.common.collect.Multimap;
 import com.threerings.sling.web.data.Account;
 
 /**
- * Provides no game-specific info.
+ * Provides no game-specific info. This is just a class to make testing easier.
  */
-public class DummyGameInfoProvider extends GameInfoProvider
+public class AbstractGameInfoProvider
+    implements GameInfoProvider
 {
     @Override // from GameInfoProvider
     public void resolveGameNames (Set<String> names, Multimap<String, String> gameNames)
@@ -38,6 +39,5 @@ public class DummyGameInfoProvider extends GameInfoProvider
     @Override // from GameInfoProvider
     public void populateAccount (Account account)
     {
-        // nothing doing
     }
 }
