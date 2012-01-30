@@ -4,28 +4,30 @@
 package com.threerings.sling.server;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Predicates;
 import com.google.common.base.Supplier;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import com.samskivert.net.MailUtil;
-import com.samskivert.util.Comparators;
 import com.samskivert.util.Tuple;
 
 import com.samskivert.servlet.SiteIdentifier;
@@ -192,7 +194,7 @@ public class UserLogic
         Collection<String> banned = _userRepo.filterBannedIdents(user.machIdents, siteId);
 
         // collect all account names and a list of related accounts for each ident
-        Set<String> names = new HashSet<String>();
+        Set<String> names = Sets.newHashSet();
         Map<String, List<OOOUserCard>> cardsForIdents = Maps.newHashMap();
         for (String id : user.machIdents) {
             List<OOOUserCard> idNames = Lists.newArrayList(_userRepo.getUsersOfMachIdentCards(id));
@@ -202,14 +204,13 @@ public class UserLogic
 
         // get banned names
         byte bannedToken = OOOUser.getBannedToken(siteId);
-        Set<String> bannedNames = Collections.emptySet();
-        if (bannedToken > 0) {
-            bannedNames = Sets.newHashSet(_userRepo.getTokenUsernames(names, bannedToken));
-        }
+        Set<String> bannedNames = (bannedToken > 0)
+            ? Sets.newHashSet(_userRepo.getTokenUsernames(names, bannedToken))
+            : ImmutableSet.<String>of();
 
         // convert games names to "usernames"
         // TODO: this is confusing, do we need the concept of usernames?
-        HashSet<String> usernames = new HashSet<String>();
+        Set<String> usernames = Sets.newHashSet();
         for (String name : names) {
             String username = getUsername(name);
             if (username != null) {
@@ -298,7 +299,7 @@ public class UserLogic
         throws SlingException
     {
         // build a map of matching emails to account names
-        HashMap<String, String> names = Maps.newHashMap();
+        Map<String, String> names = Maps.newHashMap();
         for (String username : _userRepo.getUsernames(query)) {
             names.put(username, getUsername(username)); // may be null-valued
         }
@@ -342,26 +343,22 @@ public class UserLogic
      */
     public Map<String, AccountName> resolveNames (Set<String> accounts)
     {
-        // remove old names before we start
-        _names.removeOld(NAME_REFRESH_INTERVAL);
-
         accounts = Sets.filter(accounts, Predicates.notNull());
-        Set<String> toResolve = Sets.difference(accounts, _names.keySet());
+        Set<String> toResolve = Sets.difference(accounts, _names.asMap().keySet());
 
-        if (toResolve.size() > 0) {
+        if (!toResolve.isEmpty()) {
             ArrayListMultimap<String, String> gameNames = ArrayListMultimap.create();
             _infoProvider.resolveGameNames(toResolve, gameNames);
 
             for (String account : toResolve) {
-                List<String> gameNamesEntry = Lists.newArrayList(gameNames.get(account));
-                Collections.sort(gameNamesEntry, _sortGameNames);
-                _names.put(account, CacheEntry.wrap(new AccountName(account, gameNamesEntry)));
+                _names.put(account,
+                    new AccountName(account, _sortGameNames.sortedCopy(gameNames.get(account))));
             }
         }
 
         Map<String, AccountName> resolved = Maps.newHashMap();
         for (String account : accounts) {
-            AccountName accName = _names.getUnwrappedValue(account);
+            AccountName accName = _names.getIfPresent(account);
             resolved.put(account, accName == null ? new AccountName(account) : accName);
         }
         return resolved;
@@ -369,7 +366,7 @@ public class UserLogic
 
     public AccountName resolveName (String username)
     {
-        return resolveNames(Collections.singleton(username)).get(username);
+        return resolveNames(ImmutableSet.of(username)).get(username);
     }
 
     /**
@@ -378,7 +375,7 @@ public class UserLogic
      */
     public void invalidateCharacterName (String oldName)
     {
-        for (Iterator<AccountName> iter = _names.unwrappedValues().iterator(); iter.hasNext();) {
+        for (Iterator<AccountName> iter = _names.asMap().values().iterator(); iter.hasNext();) {
             AccountName acct = iter.next();
             if (acct.gameNames.contains(oldName)) {
                 iter.remove();
@@ -479,11 +476,12 @@ public class UserLogic
         user.setEmail(email);
     }
 
-    protected Comparator<String> _sortGameNames = new Comparator<String>() {
+    protected Ordering<String> _sortGameNames = new Ordering<String>() {
         @Override public int compare (String gn1, String gn2) {
-            int cmp = Comparators.compare(
-                _infoProvider.isDeleted(gn1), _infoProvider.isDeleted(gn2));
-            return cmp == 0 ? gn1.compareTo(gn2) : cmp;
+            return ComparisonChain.start()
+                .compare(_infoProvider.isDeleted(gn1), _infoProvider.isDeleted(gn2))
+                .compare(gn1, gn2)
+                .result();
         }
     };
 
@@ -494,7 +492,9 @@ public class UserLogic
     protected Supplier<DepotUserManager> _userMgr;
 
     /** A cache of resolved account names. */
-    protected CacheEntryMap<String, AccountName> _names = CacheEntryMap.makeNew();
+    protected Cache<String, AccountName> _names = CacheBuilder.newBuilder()
+        .expireAfterWrite(NAME_REFRESH_INTERVAL, TimeUnit.MILLISECONDS)
+        .build();
 
     protected static final int OOOUSER_PAID_MASK =
         OOOUser.HAS_BOUGHT_COINS_FLAG | OOOUser.HAS_BOUGHT_TIME_FLAG;
