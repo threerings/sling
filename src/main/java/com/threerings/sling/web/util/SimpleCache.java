@@ -3,31 +3,43 @@
 
 package com.threerings.sling.web.util;
 
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.base.Optional;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import com.threerings.sling.web.client.SlingException;
 
 /**
  * A simple cache for keeping data from sling repos close to hand. Each item in the cache is
  * allowed to live for a number of milliseconds given on construction. Items are automatically
- * removed after they have been around for that long. This uses a ConcurrentMap internally so is
- * threadsafe. Unlike concurrent map, however, values may be null.
+ * removed after they have been around for that long. This uses a Cache internally so is
+ * threadsafe, but values are wrapped so they may be null.
  *
  * @param <K> the unique id for a cache datum
  * @param <V> the type of cache data
- * @see ConcurrentMap
+ * @see Cache
  */
 public abstract class SimpleCache<K, V>
 {
-    public final long ttlMillis;
-
     /**
      * Creatse a new simple cache with the given time to live.
      * @param ttlMillis milliseconds after which an entry is considered old and should be removed
      */
     public SimpleCache (long ttlMillis)
     {
-        this.ttlMillis = ttlMillis;
+        _cache = CacheBuilder.newBuilder()
+            .expireAfterWrite(ttlMillis, TimeUnit.MILLISECONDS)
+            .build(new CacheLoader<K, Optional<V>>() {
+                public Optional<V> load (K key)
+                    throws SlingException
+                {
+                    return Optional.fromNullable(compute(key));
+                }
+            });
     }
 
     /**
@@ -37,18 +49,15 @@ public abstract class SimpleCache<K, V>
     public V get (K key)
         throws SlingException
     {
-        CacheEntry<V> entry = _cache.get(key);
-        if (entry != null && entry.age() > ttlMillis) {
-            _cache.remove(key, entry);
-            return get(key);
+        try {
+            return _cache.get(key).orNull();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof SlingException) {
+                throw (SlingException)cause;
+            }
+            throw new RuntimeException(cause);
         }
-
-        if (entry == null) {
-            _cache.putIfAbsent(key, CacheEntry.wrap(compute(key)));
-            return get(key);
-        }
-
-        return entry.value;
     }
 
     /**
@@ -58,17 +67,15 @@ public abstract class SimpleCache<K, V>
      */
     public void put (K key, V value)
     {
-        _cache.put(key, CacheEntry.wrap(value));
+        _cache.put(key, Optional.fromNullable(value));
     }
 
     /**
-     * Gets an iterable containing all values in the cache. This operation first removes expired
-     * entries.
+     * Gets an iterable containing all non-null values in the cache.
      */
     public Iterable<V> values ()
     {
-        _cache.removeOld(ttlMillis);
-        return _cache.unwrappedValues();
+        return Optional.presentInstances(_cache.asMap().values());
     }
 
     /**
@@ -76,7 +83,7 @@ public abstract class SimpleCache<K, V>
      */
     public void clear ()
     {
-        _cache.clear();
+        _cache.invalidateAll();
     }
 
     /**
@@ -84,7 +91,7 @@ public abstract class SimpleCache<K, V>
      */
     public void remove (K key)
     {
-        _cache.remove(key);
+        _cache.invalidate(key);
     }
 
     /**
@@ -94,5 +101,5 @@ public abstract class SimpleCache<K, V>
     protected abstract V compute (K key)
         throws SlingException;
 
-    private CacheEntryMap<K, V> _cache = CacheEntryMap.makeNew();
+    private final LoadingCache<K, Optional<V>> _cache;
 }
