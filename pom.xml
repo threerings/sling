@@ -14,9 +14,14 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.threerings</groupId>
+      <artifactId>ooo-util</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
       <groupId>com.samskivert</groupId>
       <artifactId>depot</artifactId>
-      <version>1.6-SNAPSHOT</version>
+      <version>1.5</version>
     </dependency>
     <dependency>
       <groupId>com.threerings</groupId>
