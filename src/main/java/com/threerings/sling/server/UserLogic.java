@@ -43,8 +43,6 @@ import com.threerings.sling.web.data.Account;
 import com.threerings.sling.web.data.AccountName;
 import com.threerings.sling.web.data.MachineIdentity;
 import com.threerings.sling.web.data.UniversalTime;
-import com.threerings.sling.web.util.CacheEntry;
-import com.threerings.sling.web.util.CacheEntryMap;
 import com.threerings.user.OOOUser;
 import com.threerings.user.OOOUserCard;
 import com.threerings.user.depot.DepotUserManager;
