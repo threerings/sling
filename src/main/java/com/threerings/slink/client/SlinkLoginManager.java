@@ -69,9 +69,12 @@ public class SlinkLoginManager
     {
         if (Boolean.valueOf(properties.getProperty("clustered"))) {
             final NodeRepository nodeRepo = injector.getInstance(NodeRepository.class);
+            final String region = properties.getProperty("node_region", null);
             _hostRepo =  new GameHostRepo() {
                 @Override public Iterable<GameHost> getServers () {
-                    return Iterables.transform(nodeRepo.loadNodes(), GameHost.FROM_NODE);
+                    List<NodeRecord> nodes = region == null ?
+                            nodeRepo.loadNodes() : nodeRepo.loadNodesFromRegion(region);
+                    return Iterables.transform(nodes, GameHost.FROM_NODE);
                 }
             };
         } else {
