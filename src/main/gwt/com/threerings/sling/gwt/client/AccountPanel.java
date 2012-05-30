@@ -3,6 +3,10 @@
 
 package com.threerings.sling.gwt.client;
 
+import java.util.Map;
+
+import com.google.common.collect.Maps;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -13,6 +17,7 @@ import com.threerings.gwt.ui.Anchor;
 import com.threerings.gwt.ui.LimitedTextArea;
 import com.threerings.gwt.ui.NumberTextBox;
 import com.threerings.gwt.ui.Popups;
+import com.threerings.gwt.ui.SmartTable;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
 import com.threerings.gwt.util.Console;
@@ -150,22 +155,11 @@ public class AccountPanel extends NamedRowSmartTable
         cell(row, 1).text(billingStatus);
         row++;
 
-        String flags = "";
-        flags = addFlag(flags, Account.Flag.HAS_BOUGHT_COINS, _msgs.hasBoughtCoins());
-        flags = addFlag(flags, Account.Flag.HAS_BOUGHT_TIME, _msgs.hasBoughtTime());
-        flags = addFlag(flags, Account.Flag.FAMILY_SUBSCRIBER, _msgs.familySubscriber());
-        flags = addFlag(flags, Account.Flag.ADMIN, _msgs.admin());
-        flags = addFlag(flags, Account.Flag.MAINTAINER, _msgs.maintainer());
-        flags = addFlag(flags, Account.Flag.INSIDER, _msgs.insider());
-        flags = addFlag(flags, Account.Flag.TESTER, _msgs.tester());
-        flags = addFlag(flags, Account.Flag.SUPPORT, _msgs.support());
-        flags = addFlag(flags, Account.Flag.BIG_SPENDER, _msgs.bigSpender());
-        flags = addFlag(flags, Account.Flag.DEADBEAT, _msgs.deadBeat());
-        if (flags.length() == 0) {
-            flags = _msgs.noFlags();
-        }
+        final Button editFlagsBtn = new Button(_msgs.editFlags());
         cell(row, 0).text(_msgs.flags()).styles("Label");
-        cell(row, 1).text(flags).styles("FlagsCell");
+        cell(row, 1).text(getFlagsString()).styles("FlagsCell");
+        cell(row, 2).widget(editFlagsBtn);
+        nameRow("flags", row++);
         row++;
 
         row = addMoreControls(row);
@@ -208,9 +202,14 @@ public class AccountPanel extends NamedRowSmartTable
                     cell("warn", 1).text(_account.warning);
                 }
 
+                int row = getNamedRow("flags");
+                if (row != -1) {
+                    cell(row, 1).text(getFlagsString());
+                }
+
                 if (!_account.isSet(Account.Flag.BANNED) && _account.tempBan != null) {
                     if (getNamedRow("tempBanDetail") == -1) {
-                        int row = insertRow(getNamedRow("tempBan"));
+                        row = insertRow(getNamedRow("tempBan"));
                         nameRow("tempBanDetail", row);
                         cell(row, 1).widget(new Label(
                             ServerTime.from(_account.tempBan).format()));
@@ -410,6 +409,65 @@ public class AccountPanel extends NamedRowSmartTable
                 return true;
             }
         };
+
+        new ClickCallback<Integer>(editFlagsBtn) {
+            @Override
+            protected boolean callService()
+            {
+                int setFlags = 0, clearFlags = 0;
+                for (Map.Entry<Account.Flag, CheckBox> entry : _flags.entrySet()) {
+                    if (entry.getValue().getValue()) {
+                        setFlags |= entry.getKey().mask();
+                    } else {
+                        clearFlags |= entry.getKey().mask();
+                    }
+                }
+                _ctx.svc.updateFlags(_account.name.accountName, setFlags, clearFlags, this);
+                return true;
+            }
+
+            @Override
+            protected boolean gotResult (Integer result)
+            {
+                for (Map.Entry<Account.Flag, CheckBox> entry : _flags.entrySet()) {
+                    Account.Flag flag = entry.getKey();
+                    if ((flag.mask() & result) != 0) {
+                        _account.set(flag, entry.getValue().getValue());
+                    }
+                }
+                _updater.update();
+                return true;
+            }
+
+            @Override
+            protected int addConfirmPopupMessage (SmartTable contents, int row)
+            {
+                row = super.addConfirmPopupMessage(contents, row);
+                if (_ctx.ainfo.isMaintainer) {
+                    row = addFlag(contents, row, Account.Flag.MAINTAINER, _msgs.maintainer());
+                    row = addFlag(contents, row, Account.Flag.ADMIN, _msgs.admin());
+                }
+                if (_ctx.ainfo.isAdmin) {
+                    row = addFlag(contents, row, Account.Flag.SUPPORT, _msgs.support());
+                }
+                row = addFlag(contents, row, Account.Flag.INSIDER, _msgs.insider());
+                row = addFlag(contents, row, Account.Flag.TESTER, _msgs.tester());
+                row = addFlag(contents, row, Account.Flag.DEADBEAT, _msgs.deadBeat());
+                return row;
+            }
+
+            protected int addFlag (SmartTable contents, int row, Account.Flag flag, String label)
+            {
+                CheckBox cb = new CheckBox(label);
+                _flags.put(flag, cb);
+                cb.setValue(_account.isSet(flag));
+                contents.setWidget(row, 0, cb);
+                row++;
+                return row;
+            }
+
+            protected Map<Account.Flag, CheckBox> _flags = Maps.newHashMap();
+        }.setConfirmText(_msgs.editFlagsMessage(_account.name.accountName));
     }
 
     /**
@@ -435,6 +493,25 @@ public class AccountPanel extends NamedRowSmartTable
     protected interface UserStatusUpdater
     {
         public void update ();
+    }
+
+    public String getFlagsString ()
+    {
+        String flags = "";
+        flags = addFlag(flags, Account.Flag.HAS_BOUGHT_COINS, _msgs.hasBoughtCoins());
+        flags = addFlag(flags, Account.Flag.HAS_BOUGHT_TIME, _msgs.hasBoughtTime());
+        flags = addFlag(flags, Account.Flag.FAMILY_SUBSCRIBER, _msgs.familySubscriber());
+        flags = addFlag(flags, Account.Flag.ADMIN, _msgs.admin());
+        flags = addFlag(flags, Account.Flag.MAINTAINER, _msgs.maintainer());
+        flags = addFlag(flags, Account.Flag.INSIDER, _msgs.insider());
+        flags = addFlag(flags, Account.Flag.TESTER, _msgs.tester());
+        flags = addFlag(flags, Account.Flag.SUPPORT, _msgs.support());
+        flags = addFlag(flags, Account.Flag.BIG_SPENDER, _msgs.bigSpender());
+        flags = addFlag(flags, Account.Flag.DEADBEAT, _msgs.deadBeat());
+        if (flags.length() == 0) {
+            flags = _msgs.noFlags();
+        }
+        return flags;
     }
 
     protected SlingContext _ctx;

@@ -63,6 +63,8 @@ public class UserLogic
         public String username;
         public String email;
         public boolean isSupport;
+        public boolean isAdmin;
+        public boolean isMaintainer;
     }
 
     /**
@@ -101,25 +103,15 @@ public class UserLogic
             return null;
         }
 
-        Caller caller = new Caller();
-        caller.authtok = authtok;
-        caller.username = getUsername(user.username);
-        caller.email = user.email;
-        caller.isSupport = user.isSupportPlus();
-        return caller;
+        return createCaller(user, authtok);
     }
 
     public Caller userLogin (String username, String password, int expireDays)
-        throws AuthenticationFailedException, InvalidPasswordException
+        throws AuthenticationFailedException, InvalidPasswordException, SlingException
     {
         Tuple<OOOUser, String> bits = _userMgr.get().login(username,
             Password.makeFromCrypto(password), expireDays, DepotUserManager.AUTH_PASSWORD);
-        Caller caller = new Caller();
-        caller.authtok = bits.right;
-        caller.username = bits.left.username;
-        caller.email = bits.left.email;
-        caller.isSupport = bits.left.isSupportPlus();
-        return caller;
+        return createCaller(bits.left, bits.right);
     }
 
     public String getSupportUsername (String accountName)
@@ -334,6 +326,32 @@ public class UserLogic
         }
     }
 
+    public void updateFlags (String accountName, int setFlags, int clearFlags, int siteId)
+    {
+        OOOUser user = _userRepo.loadUser(accountName, false);
+        if (user == null) {
+            log.warning("no user found to update flags");
+            return;
+        }
+        updateToken(user, setFlags, clearFlags, Account.Flag.MAINTAINER.mask(), OOOUser.MAINTAINER);
+        updateToken(user, setFlags, clearFlags, Account.Flag.ADMIN.mask(), OOOUser.ADMIN);
+        updateToken(user, setFlags, clearFlags, Account.Flag.SUPPORT.mask(), OOOUser.SUPPORT);
+        updateToken(user, setFlags, clearFlags, Account.Flag.INSIDER.mask(), OOOUser.INSIDER);
+        updateToken(user, setFlags, clearFlags, Account.Flag.TESTER.mask(), OOOUser.TESTER);
+        updateToken(user, setFlags, clearFlags, Account.Flag.DEADBEAT.mask(),
+                OOOUser.getDeadbeatToken(siteId));
+        _userRepo.updateUser(user);
+    }
+
+    protected void updateToken (OOOUser user, int setFlags, int clearFlags, int mask, byte token)
+    {
+        if ((setFlags & mask) != 0) {
+            user.addToken(token);
+        } else if ((clearFlags & mask) != 0) {
+            user.removeToken(token);
+        }
+    }
+
     /**
      * Resolves the game names for the given set of account names and returns a mapping.
      * @param accounts set of account names to resolve
@@ -402,11 +420,11 @@ public class UserLogic
         account.set(Account.Flag.HAS_BOUGHT_COINS, user.hasBoughtCoins());
         account.set(Account.Flag.HAS_BOUGHT_TIME, user.hasBoughtTime());
         account.set(Account.Flag.FAMILY_SUBSCRIBER, user.isFamilySubscriber());
-        account.set(Account.Flag.ADMIN, user.isAdmin());
-        account.set(Account.Flag.MAINTAINER, user.isMaintainer());
-        account.set(Account.Flag.INSIDER, user.isInsider());
+        account.set(Account.Flag.ADMIN, user.holdsToken(OOOUser.ADMIN));
+        account.set(Account.Flag.MAINTAINER, user.holdsToken(OOOUser.MAINTAINER));
+        account.set(Account.Flag.INSIDER, user.holdsToken(OOOUser.INSIDER));
         account.set(Account.Flag.TESTER, user.holdsToken(OOOUser.TESTER));
-        account.set(Account.Flag.SUPPORT, user.isSupport());
+        account.set(Account.Flag.SUPPORT, user.holdsToken(OOOUser.SUPPORT));
         account.set(Account.Flag.BIG_SPENDER, user.isBigSpender());
         account.set(Account.Flag.BANNED, user.isBanned(siteId));
         account.set(Account.Flag.DEADBEAT, user.isDeadbeat(siteId));
@@ -472,6 +490,22 @@ public class UserLogic
     protected void setUserEmail (OOOUser user, String email)
     {
         user.setEmail(email);
+    }
+
+    /**
+     * Creates a caller from a user and authentication token.
+     */
+    protected Caller createCaller (OOOUser user, String authtok)
+        throws SlingException
+    {
+        Caller caller = new Caller();
+        caller.authtok = authtok;
+        caller.username = getUsername(user.username);
+        caller.email = user.email;
+        caller.isSupport = user.isSupportPlus();
+        caller.isAdmin = user.isAdmin();
+        caller.isMaintainer = user.isMaintainer();
+        return caller;
     }
 
     protected Ordering<String> _sortGameNames = new Ordering<String>() {

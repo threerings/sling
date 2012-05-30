@@ -243,4 +243,10 @@ public interface SlingServiceAsync
      */
     public void updateIdentTaint (String machIdent, boolean tainted,
                                     AsyncCallback<Void> callback);
+
+    /**
+     * The asynchronous version of {@link SlingService#updateFlags}.
+     */
+    public void updateFlags (String accountName, int setFlags, int clearFlags,
+            AsyncCallback<Integer> callback);
 }

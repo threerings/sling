@@ -869,6 +869,26 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     // from SlingService
+    @Override public int updateFlags (String accountName, int setFlags, int clearFlags)
+        throws SlingException
+    {
+        Caller user = requireAuthedSupport();
+        int mask = Account.Flag.DEADBEAT.mask() | Account.Flag.INSIDER.mask() |
+            Account.Flag.TESTER.mask();
+        if (user.isMaintainer) {
+            mask |= Account.Flag.ADMIN.mask() | Account.Flag.MAINTAINER.mask();
+        }
+        if (user.isAdmin) {
+            mask |= Account.Flag.SUPPORT.mask();
+        }
+        setFlags &= mask;
+        clearFlags &= mask;
+
+        _userLogic.updateFlags(accountName, setFlags, clearFlags, getSiteId());
+        return mask;
+    }
+
+    // from SlingService
     @Override public Category[] getFAQs ()
         throws SlingException
     {
@@ -1017,8 +1037,10 @@ public abstract class SlingServlet extends RemoteServiceServlet
         AuthInfo ainfo = new AuthInfo();
         ainfo.name = withoutDeletedGameNames(_userLogic.resolveName(caller.username));
         ainfo.email = caller.email;
-        ainfo.isAdmin = caller.isSupport;
-        if (ainfo.isAdmin) {
+        ainfo.isSupport = caller.isSupport;
+        ainfo.isAdmin = caller.isAdmin;
+        ainfo.isMaintainer = caller.isMaintainer;
+        if (ainfo.isSupport) {
             String site = _siteIdentifier.getSiteString(getSiteId());
             ainfo.setUrl(AuthUrl.GAME, OOOConfig.getGameInfoURL(site));
             ainfo.setUrl(AuthUrl.BILLING, OOOConfig.getBillingInfoURL(site));

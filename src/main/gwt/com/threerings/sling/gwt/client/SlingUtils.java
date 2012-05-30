@@ -94,7 +94,7 @@ public class SlingUtils
      */
     public static Widget linkToAccount (SlingContext ctx, AccountName acct)
     {
-        if (acct.accountName.length() > 0 && ctx.isAdmin()) {
+        if (acct.accountName.length() > 0 && ctx.isSupport()) {
             return linkToAccount(ctx, acct.toString(), acct.accountName);
         }
         return new Label(acct.toString());

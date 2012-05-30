@@ -71,15 +71,15 @@ public class SlingContext
     /**
      * Returns true if the user is currently authenticated as an admin, false otherwise.
      */
-    public boolean isAdmin ()
+    public boolean isSupport ()
     {
-        return ainfo != null && ainfo.isAdmin;
+        return ainfo != null && ainfo.isSupport;
     }
 
     @Override // from BaseContext
     public AuthLevel getCurrentAuthLevel ()
     {
-        return isAdmin() ? AuthLevel.ADMIN : ainfo != null ? AuthLevel.USER : AuthLevel.NONE;
+        return isSupport() ? AuthLevel.ADMIN : ainfo != null ? AuthLevel.USER : AuthLevel.NONE;
     }
 
     /**

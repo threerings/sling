@@ -37,7 +37,7 @@ public class FAQPanels extends FlowPanel
     public static FlowPanel view (SlingContext ctx, Category[] categories)
     {
         FlowPanel panel = Widgets.newFlowPanel("uFaqPanel");
-        if (ctx.isAdmin()) {
+        if (ctx.isSupport()) {
             panel.add(new ParaPanel(SlingUtils.makeLink(ctx, _msgs.edit(), FAQ.edit()), "EditLink"));
         }
         panel.add(new ParaPanel(_msgs.frequentlyAskedQuestions(), "Title"));

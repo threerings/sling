@@ -28,7 +28,7 @@ import static com.threerings.sling.gwt.client.SlingNav.Accounts;
 import static com.threerings.sling.gwt.client.SlingUtils.translateServerError;
 
 /**
- * Implementation of the #accounts section. 
+ * Implementation of the #accounts section.
  */
 public class AccountsSection<Ctx extends SlingContext>
     implements Section<Ctx>

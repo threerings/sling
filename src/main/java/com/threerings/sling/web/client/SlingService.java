@@ -56,7 +56,9 @@ public interface SlingService extends RemoteService
     {
         public AccountName name;
         public String email;
+        public boolean isSupport;
         public boolean isAdmin;
+        public boolean isMaintainer;
         public ServerInfo serverInfo;
 
         public AuthInfo() {}
@@ -423,5 +425,11 @@ public interface SlingService extends RemoteService
      * Updates the tainted status of the specified machine ident. Admins only.
      */
     public void updateIdentTaint (String machIdent, boolean tainted)
+        throws SlingException;
+
+    /**
+     * Updates the flags for an account. Admins only.
+     */
+    public int updateFlags (String accountName, int setFlags, int clearFlags)
         throws SlingException;
 }
