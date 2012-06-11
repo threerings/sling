@@ -62,6 +62,7 @@ public class UserLogic
         public String authtok;
         public String username;
         public String email;
+        public boolean isJrSupport;
         public boolean isSupport;
         public boolean isAdmin;
         public boolean isMaintainer;
@@ -425,6 +426,7 @@ public class UserLogic
         account.set(Account.Flag.INSIDER, user.holdsToken(OOOUser.INSIDER));
         account.set(Account.Flag.TESTER, user.holdsToken(OOOUser.TESTER));
         account.set(Account.Flag.SUPPORT, user.holdsToken(OOOUser.SUPPORT));
+        account.set(Account.Flag.JR_SUPPORT, user.holdsToken(OOOUser.JR_SUPPORT));
         account.set(Account.Flag.BIG_SPENDER, user.isBigSpender());
         account.set(Account.Flag.BANNED, user.isBanned(siteId));
         account.set(Account.Flag.DEADBEAT, user.isDeadbeat(siteId));
@@ -503,6 +505,7 @@ public class UserLogic
         caller.username = getUsername(user.username);
         caller.email = user.email;
         caller.isSupport = user.isSupportPlus();
+        caller.isJrSupport = user.isSupportPlus() || user.holdsToken(OOOUser.JR_SUPPORT);
         caller.isAdmin = user.isAdmin();
         caller.isMaintainer = user.isMaintainer();
         return caller;

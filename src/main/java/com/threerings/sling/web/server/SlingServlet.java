@@ -1037,6 +1037,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         AuthInfo ainfo = new AuthInfo();
         ainfo.name = withoutDeletedGameNames(_userLogic.resolveName(caller.username));
         ainfo.email = caller.email;
+        ainfo.isJrSupport = caller.isJrSupport;
         ainfo.isSupport = caller.isSupport;
         ainfo.isAdmin = caller.isAdmin;
         ainfo.isMaintainer = caller.isMaintainer;
@@ -1085,6 +1086,17 @@ public abstract class SlingServlet extends RemoteServiceServlet
         Caller user = requireAuthedUser();
         // make sure they have proper privileges
         if (!user.isSupport) {
+            throw new AuthenticationException("m.access_denied");
+        }
+        return user;
+    }
+
+    protected Caller requireAuthedJrSupport ()
+        throws SlingException
+    {
+        Caller user = requireAuthedUser();
+        // make sure they have proper privileges
+        if (!user.isJrSupport) {
             throw new AuthenticationException("m.access_denied");
         }
         return user;

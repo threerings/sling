@@ -15,7 +15,7 @@ public class Account
     public enum Flag
     {
         HAS_BOUGHT_COINS, HAS_BOUGHT_TIME, FAMILY_SUBSCRIBER, ADMIN, MAINTAINER,
-        INSIDER, TESTER, SUPPORT, BIG_SPENDER, BANNED, DEADBEAT;
+        INSIDER, TESTER, SUPPORT, JR_SUPPORT, BIG_SPENDER, BANNED, DEADBEAT;
 
         public int mask ()
         {

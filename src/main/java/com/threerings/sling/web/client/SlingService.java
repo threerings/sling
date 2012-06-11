@@ -57,6 +57,7 @@ public interface SlingService extends RemoteService
         public AccountName name;
         public String email;
         public boolean isSupport;
+        public boolean isJrSupport;
         public boolean isAdmin;
         public boolean isMaintainer;
         public ServerInfo serverInfo;

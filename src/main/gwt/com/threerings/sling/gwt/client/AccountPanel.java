@@ -449,6 +449,7 @@ public class AccountPanel extends NamedRowSmartTable
                 }
                 if (_ctx.ainfo.isAdmin) {
                     row = addFlag(contents, row, Account.Flag.SUPPORT, _msgs.support());
+                    row = addFlag(contents, row, Account.Flag.JR_SUPPORT, _msgs.jrSupport());
                 }
                 row = addFlag(contents, row, Account.Flag.INSIDER, _msgs.insider());
                 row = addFlag(contents, row, Account.Flag.TESTER, _msgs.tester());
@@ -506,6 +507,7 @@ public class AccountPanel extends NamedRowSmartTable
         flags = addFlag(flags, Account.Flag.INSIDER, _msgs.insider());
         flags = addFlag(flags, Account.Flag.TESTER, _msgs.tester());
         flags = addFlag(flags, Account.Flag.SUPPORT, _msgs.support());
+        flags = addFlag(flags, Account.Flag.JR_SUPPORT, _msgs.jrSupport());
         flags = addFlag(flags, Account.Flag.BIG_SPENDER, _msgs.bigSpender());
         flags = addFlag(flags, Account.Flag.DEADBEAT, _msgs.deadBeat());
         if (flags.length() == 0) {
