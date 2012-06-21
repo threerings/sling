@@ -879,7 +879,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             mask |= Account.Flag.ADMIN.mask() | Account.Flag.MAINTAINER.mask();
         }
         if (user.isAdmin) {
-            mask |= Account.Flag.SUPPORT.mask();
+            mask |= Account.Flag.SUPPORT.mask() | Account.Flag.JR_SUPPORT.mask();
         }
         setFlags &= mask;
         clearFlags &= mask;

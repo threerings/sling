@@ -337,6 +337,7 @@ public class UserLogic
         updateToken(user, setFlags, clearFlags, Account.Flag.MAINTAINER.mask(), OOOUser.MAINTAINER);
         updateToken(user, setFlags, clearFlags, Account.Flag.ADMIN.mask(), OOOUser.ADMIN);
         updateToken(user, setFlags, clearFlags, Account.Flag.SUPPORT.mask(), OOOUser.SUPPORT);
+        updateToken(user, setFlags, clearFlags, Account.Flag.JR_SUPPORT.mask(), OOOUser.JR_SUPPORT);
         updateToken(user, setFlags, clearFlags, Account.Flag.INSIDER.mask(), OOOUser.INSIDER);
         updateToken(user, setFlags, clearFlags, Account.Flag.TESTER.mask(), OOOUser.TESTER);
         updateToken(user, setFlags, clearFlags, Account.Flag.DEADBEAT.mask(),
