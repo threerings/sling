@@ -175,14 +175,11 @@ public class EventPanel extends FlowPanel
                 add(Widgets.newHTML("<pre>" + event.chatHistory.substring(4) + "</pre>",
                     "ChatHistoryHTML"));
 
-            } else if (event.chatHistory.startsWith("LINES")) {
-                String safeLines = SafeHtmlUtils.htmlEscape(event.chatHistory.substring(5));
+            } else {
+                String safeLines = SafeHtmlUtils.htmlEscape(event.chatHistory);
                 add(Widgets.newHTML(
                     "<pre>" + safeLines.replaceAll("\n", "<br>") + "</pre>",
                     "ChatHistory"));
-
-            } else {
-                add(Widgets.newLabel(event.chatHistory, "ChatHistory"));
             }
         }
 
