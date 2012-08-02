@@ -13,6 +13,7 @@ import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -173,6 +174,13 @@ public class EventPanel extends FlowPanel
             if (event.chatHistory.startsWith("HTML")) {
                 add(Widgets.newHTML("<pre>" + event.chatHistory.substring(4) + "</pre>",
                     "ChatHistoryHTML"));
+
+            } else if (event.chatHistory.startsWith("LINES")) {
+                String safeLines = SafeHtmlUtils.htmlEscape(event.chatHistory.substring(5));
+                add(Widgets.newHTML(
+                    "<pre>" + safeLines.replaceAll("\n", "<br>") + "</pre>",
+                    "ChatHistory"));
+
             } else {
                 add(Widgets.newLabel(event.chatHistory, "ChatHistory"));
             }
