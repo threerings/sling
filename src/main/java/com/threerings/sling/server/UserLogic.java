@@ -515,7 +515,7 @@ public class UserLogic
     protected Ordering<String> _sortGameNames = new Ordering<String>() {
         @Override public int compare (String gn1, String gn2) {
             return ComparisonChain.start()
-                .compare(_infoProvider.isDeleted(gn1), _infoProvider.isDeleted(gn2))
+                .compareFalseFirst(_infoProvider.isDeleted(gn1), _infoProvider.isDeleted(gn2))
                 .compare(gn1, gn2)
                 .result();
         }
