@@ -53,7 +53,7 @@ public class PostNotePanel extends SmartTable
         text.addChangeHandler(onChange);
         postBtn.setEnabled(false);
 
-        new ClickCallback<Void>(postBtn) {
+        new ClickCallback<Integer>(postBtn) {
             @Override
             protected boolean callService ()
             {
@@ -63,12 +63,11 @@ public class PostNotePanel extends SmartTable
             }
 
             @Override
-            protected boolean gotResult (Void result)
+            protected boolean gotResult (Integer result)
             {
                 cell(3, 1).widget(Widgets.newRow("ResultRow",
-                    Widgets.newLabel(_msgs.notePosted()),
-                    SlingUtils.linkToAccount(
-                        _ctx, _msgs.viewAccount() + _accountName, _accountName)));
+                    SlingUtils.makeLink(_ctx, _msgs.notePosted(), SlingNav.Events.loadEvent(result)),
+                    SlingUtils.linkToAccount(_ctx, _msgs.viewAccount(), _accountName)));
                 return false;
             }
 

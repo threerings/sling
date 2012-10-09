@@ -757,15 +757,21 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     // from SlingService
-    @Override public void addNote (String accountName, String subject, String note)
+    @Override public int addNote (String accountName, String subject, String note)
         throws SlingException
     {
         Caller caller = requireAuthedSupport();
-        // WordWrap the note since it's currently being stuck into a <pre></pre> formatted box.  In
-        // the future when we've got event types the client can be told how to properly format a
-        // note event.
-        recordEvent(Event.Type.NOTE, caller.username, accountName,
-            "Support Note: \"" + subject + "\"", StringUtil.wordWrap(note, 80));
+        int eventId = recordEvent(Event.Type.NOTE, caller.username, accountName, subject, "");
+
+        // create and add the message record
+        MessageRecord msgrec = new MessageRecord();
+        msgrec.eventId = eventId;
+        msgrec.author = caller.username;
+        msgrec.text = note;
+        msgrec.access = Message.Access.SUPPORT;
+        _slingRepo.insertMessage(msgrec, false);
+
+        return eventId;
     }
 
     // from SlingService
@@ -1141,13 +1147,13 @@ public abstract class SlingServlet extends RemoteServiceServlet
         return evrec.eventId;
     }
 
-    protected void recordEvent (Event.Type type, String source, String target, String subject)
+    protected int recordEvent (Event.Type type, String source, String target, String subject)
         throws SlingException
     {
-        recordEvent(type, source, target, subject, null);
+        return recordEvent(type, source, target, subject, null);
     }
 
-    protected void recordEvent (Event.Type type, String source, String target, String subject,
+    protected int recordEvent (Event.Type type, String source, String target, String subject,
         String text)
         throws SlingException
     {
@@ -1163,6 +1169,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
 
         // add the event record
         _slingRepo.insertEvent(evrec);
+
+        return evrec.eventId;
     }
 
     protected PagedResult<Event> toResult(

@@ -209,7 +209,7 @@ public interface SlingServiceAsync
      */
     public void addNote (
         String accountName, String subject, String note,
-        AsyncCallback<Void> callback);
+        AsyncCallback<Integer> callback);
 
     /**
      * The asynchronous version of {@link SlingService#postMessage}.

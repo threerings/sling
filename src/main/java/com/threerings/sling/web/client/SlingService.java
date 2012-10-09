@@ -383,7 +383,7 @@ public interface SlingService extends RemoteService
     /**
      * Adds a support note to an account. Admin only.
      */
-    public void addNote (String accountName, String subject, String note)
+    public int addNote (String accountName, String subject, String note)
         throws SlingException;
 
     /**
