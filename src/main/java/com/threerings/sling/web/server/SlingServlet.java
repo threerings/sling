@@ -782,8 +782,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
             throw new SlingException("m.access_denied");
         }
 
-        // require that the event still be in an open state
-        if (!event.status.isOpen()) {
+        // require that the event still be in an open state for publicly visible messages
+        if (access == Message.Access.NORMAL && !event.status.isOpen()) {
             throw new SlingException("m.event_closed");
         }
 
