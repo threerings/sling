@@ -4,7 +4,6 @@
   <groupId>com.threerings</groupId>
   <artifactId>sling</artifactId>
   <packaging>jar</packaging>
-  <version>1.4</version>
 
   <name>Sling</name>
 
@@ -116,4 +115,5 @@
       </plugin>
     </plugins>
   </build>
+  <version>1.5-SNAPSHOT</version>
 </project>
