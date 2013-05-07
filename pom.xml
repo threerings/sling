@@ -26,12 +26,12 @@
     <dependency>
       <groupId>com.samskivert</groupId>
       <artifactId>depot</artifactId>
-      <version>1.6</version>
+      <version>1.6.1</version>
     </dependency>
     <dependency>
       <groupId>com.threerings</groupId>
       <artifactId>gwt-utils</artifactId>
-      <version>1.6</version>
+      <version>1.7.1</version>
     </dependency>
     <dependency>
       <groupId>com.google.gwt</groupId>
@@ -41,7 +41,7 @@
     <dependency>
       <groupId>com.threerings</groupId>
       <artifactId>narya</artifactId>
-      <version>1.13.1</version>
+      <version>1.14</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>com.threerings</groupId>
       <artifactId>ooo-user</artifactId>
-      <version>1.4.1</version>
+      <version>1.4.3</version>
     </dependency>
     <dependency>
       <groupId>com.threerings</groupId>
@@ -73,12 +73,7 @@
     <dependency>
       <groupId>com.samskivert</groupId>
       <artifactId>samskivert</artifactId>
-      <version>1.7</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava-jdk5</artifactId>
-      <version>13.0</version>
+      <version>1.7.1</version>
     </dependency>
   </dependencies>
 
