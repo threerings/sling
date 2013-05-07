@@ -16,6 +16,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.samskivert.depot.CountRecord;
 import com.samskivert.depot.DateFuncs;
 import com.samskivert.depot.DepotRepository;
 import com.samskivert.depot.Funcs;
@@ -40,7 +41,6 @@ import com.threerings.sling.web.data.EventFilter;
 import com.threerings.sling.web.data.EventSearch;
 import com.threerings.sling.web.data.TimeRange;
 import com.threerings.sling.web.data.UniversalTime;
-import com.threerings.user.depot.DepotUserRepository.CountRecord;
 
 /**
  * Manages various support persistent data.
