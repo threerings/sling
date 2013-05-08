@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentMap;
@@ -39,6 +40,7 @@ import com.google.inject.Inject;
 
 import com.samskivert.net.MailUtil;
 import com.samskivert.util.Calendars;
+import com.samskivert.util.Config;
 import com.samskivert.util.HashIntMap;
 import com.samskivert.util.StringUtil;
 
@@ -47,8 +49,6 @@ import com.samskivert.servlet.user.AuthenticationFailedException;
 import com.samskivert.servlet.user.InvalidPasswordException;
 import com.samskivert.servlet.user.NoSuchUserException;
 import com.samskivert.servlet.util.CookieUtil;
-
-import com.threerings.util.OOOConfig;
 
 import com.threerings.gwt.util.PagedRequest;
 import com.threerings.gwt.util.PagedResult;
@@ -1049,8 +1049,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
         ainfo.isMaintainer = caller.isMaintainer;
         if (ainfo.isSupport) {
             String site = _siteIdentifier.getSiteString(getSiteId());
-            ainfo.setUrl(AuthUrl.GAME, OOOConfig.getGameInfoURL(site));
-            ainfo.setUrl(AuthUrl.BILLING, OOOConfig.getBillingInfoURL(site));
+            ainfo.setUrl(AuthUrl.GAME, _oooconf.getValue(site + ".game_info", ""));
+            ainfo.setUrl(AuthUrl.BILLING, _oooconf.getValue(site + ".billing_info", ""));
         }
         ainfo.serverInfo = new ServerInfo();
 
@@ -1296,6 +1296,17 @@ public abstract class SlingServlet extends RemoteServiceServlet
     @Inject protected GameInfoProvider _infoProvider;
     @Inject protected SlingRepository _slingRepo;
     @Inject protected SiteIdentifier _siteIdentifier;
+
+    protected Properties loadOOOProps () {
+        Properties props = new Properties();
+        try {
+            props.load(getClass().getClassLoader().getResourceAsStream("threerings.properties"));
+        } catch (Exception e) {
+            log.warning("Failed to load threerings.properties.", e);
+        }
+        return props;
+    }
+    protected final Config _oooconf = new Config(loadOOOProps());
 
     protected final Predicate<String> _notDeleted = new Predicate<String> () {
         public boolean apply (String name) {
