@@ -337,16 +337,13 @@ public class SlinkLoginManager
         // from Comparable
         public int compareTo (GameHostInfo that)
         {
+            // allow up to 3 failures before ordering is impacted, and quantize by 3 thereafter
             return ComparisonChain.start()
-                .compareFalseFirst(this.failures < MAX_RECENT_FAILURES,
-                        that.failures < MAX_RECENT_FAILURES)
+                .compare(this.failures / 3, that.failures / 3)
                 .compare(this.host.name, that.host.name)
                 .compare(this.host.port, that.host.port)
                 .result();
         };
-
-        /** How many recent failures are allowed before we deprioritize this host? */
-        public static final int MAX_RECENT_FAILURES = 3;
     }
 
     /**
