@@ -12,6 +12,7 @@ import java.util.Set;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
@@ -73,8 +74,9 @@ public class SlinkLoginManager
             final String region = properties.getProperty("node_region", null);
             _hostRepo =  new GameHostRepo() {
                 @Override public Iterable<GameHost> getServers () {
-                    List<NodeRecord> nodes = region == null ?
-                            nodeRepo.loadNodes() : nodeRepo.loadNodesFromRegion(region);
+                    List<NodeRecord> nodes = (region == null)
+                        ? nodeRepo.loadNodes()
+                        : nodeRepo.loadNodesFromRegion(region);
                     return Iterables.transform(nodes, GameHost.FROM_NODE);
                 }
             };
@@ -214,34 +216,30 @@ public class SlinkLoginManager
 
         updateGameHosts();
 
-        List<GameHostInfo> infos = Lists.newArrayList(Iterables.filter(_hostInfo.values(),
-            new Predicate<GameHostInfo>() {
-                long now = System.currentTimeMillis();
-                @Override public boolean apply (GameHostInfo input) {
-                    return !input.isBlacklisted(now);
-                }
-            }));
-
-        if (!infos.isEmpty()) {
-            GameHostInfo info = GameHostInfo.BY_LOGIN.min(infos);
-            log.info("Attempting login to game host", "host", info.host);
-            _client.setServer(info.host.name, new int[] {info.host.port});
-            info.lastLoginTime = System.currentTimeMillis();
-            _client.logon();
+        if (_hostInfo.isEmpty()) {
+            log.info("No game hosts available", "retry", NODE_REFRESH_WAIT_TIME);
+            new Interval(_invokerQueue) {
+                @Override public void expired () {
+                     doLogin();
+                 }
+            }.schedule(NODE_REFRESH_WAIT_TIME);
             return;
         }
 
-        log.info("No game hosts available", "retry", NODE_REFRESH_WAIT_TIME);
-        new Interval(_invokerQueue) {
-            @Override public void expired () {
-                 doLogin();
-             }
-        }.schedule(NODE_REFRESH_WAIT_TIME);
+        GameHostInfo info = Ordering.natural().min(_hostInfo.values());
+        log.info("Attempting login to game host", "host", info.host);
+        _client.setServer(info.host.name, new int[] {info.host.port});
+        _client.logon();
     }
 
     protected void didLogon (GameHost host)
     {
         log.info("Connection to game established", "host", host);
+
+        // clear all recent failures
+        for (GameHostInfo info : _hostInfo.values()) {
+            info.failures = 0;
+        }
     }
 
     protected void didLogoff (GameHost host)
@@ -254,10 +252,10 @@ public class SlinkLoginManager
         if (info == null) {
             log.warning("Connection from unrecognized host", "host", host);
         } else {
-            info.blacklistedTime = System.currentTimeMillis();
+            info.failures++;
         }
 
-        log.info("Game connection failure - blacklisting", "host", host, "retry", LOGOFF_WAIT_TIME);
+        log.info("Game connection failure", "host", host, "retry", LOGOFF_WAIT_TIME);
 
         new Interval(_invokerQueue) {
             @Override public void expired () {
@@ -320,24 +318,13 @@ public class SlinkLoginManager
      * Tracks some information about a game host.
      */
     protected static class GameHostInfo
+        implements Comparable<GameHostInfo>
     {
-        public static final Ordering<GameHostInfo> BY_LOGIN = new Ordering<GameHostInfo>() {
-            @Override public int compare (GameHostInfo o1, GameHostInfo o2) {
-                return Longs.compare(o1.lastLoginTime, o2.lastLoginTime);
-            }
-        };
-
         /** The game host. */
         public final GameHost host;
 
-        /** The time at which the game host was discovered. */
-        public long discoveryTime;
-
-        /** The time at which the last login was attempted, or 0 if never. */
-        public long lastLoginTime;
-
-        /** The time at which the last login failure or logoff occurred, or 0 if never. */
-        public long blacklistedTime;
+        /** How many recent failures have we seen connecting to this host? */
+        public int failures;
 
         /**
          * Creates a new game host info for the given host and sets the {@link #discoveryTime}.
@@ -345,16 +332,21 @@ public class SlinkLoginManager
         public GameHostInfo (GameHost host)
         {
             this.host = host;
-            discoveryTime = System.currentTimeMillis();
         }
 
-        /**
-         * Tests if the host if blacklisted according to the given current time.
-         */
-        public boolean isBlacklisted (long now)
+        // from Comparable
+        public int compareTo (GameHostInfo that)
         {
-            return now - blacklistedTime < BLACKLIST_DURATION;
-        }
+            return ComparisonChain.start()
+                .compareFalseFirst(this.failures < MAX_RECENT_FAILURES,
+                        that.failures < MAX_RECENT_FAILURES)
+                .compare(this.host.name, that.host.name)
+                .compare(this.host.port, that.host.port)
+                .result();
+        };
+
+        /** How many recent failures are allowed before we deprioritize this host? */
+        public static final int MAX_RECENT_FAILURES = 3;
     }
 
     /**
@@ -375,6 +367,5 @@ public class SlinkLoginManager
     protected boolean _shuttingDown;
 
     protected static final long LOGOFF_WAIT_TIME = 60*1000;
-    protected static final long BLACKLIST_DURATION = 2*60*1000;
     protected static final long NODE_REFRESH_WAIT_TIME = 60*1000;
 }
