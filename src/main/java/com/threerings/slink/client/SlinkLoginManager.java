@@ -194,13 +194,12 @@ public class SlinkLoginManager
     {
         // get the new list from the application
         Set<GameHost> hosts = Sets.newHashSet(_hostRepo.getServers());
-        Set<GameHost> oldHosts = Sets.newHashSet(_hostInfo.keySet());
 
-        // remove old ones
-        _hostInfo.keySet().removeAll(Sets.difference(oldHosts, hosts));
+        // remove hosts no longer present
+        _hostInfo.keySet().retainAll(hosts);
 
         // add new ones
-        for (GameHost host : Sets.difference(hosts, oldHosts)) {
+        for (GameHost host : Lists.newArrayList(Sets.difference(hosts, _hostInfo.keySet()))) {
             _hostInfo.put(host, new GameHostInfo(host));
         }
     }
