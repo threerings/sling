@@ -14,7 +14,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -199,7 +198,7 @@ public class SlinkLoginManager
         _hostInfo.keySet().retainAll(hosts);
 
         // add new ones
-        for (GameHost host : Lists.newArrayList(Sets.difference(hosts, _hostInfo.keySet()))) {
+        for (GameHost host : Sets.difference(hosts, _hostInfo.keySet())) {
             _hostInfo.put(host, new GameHostInfo(host));
         }
     }
