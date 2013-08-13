@@ -4,7 +4,6 @@
 package com.threerings.slink.client;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -15,8 +14,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -192,15 +193,14 @@ public class SlinkLoginManager
     {
         // get the new list from the application
         Set<GameHost> hosts = Sets.newHashSet(_hostRepo.getServers());
-
-        // add new ones
-        for (GameHost host : Sets.difference(hosts, _hostInfo.keySet())) {
-            _hostInfo.put(host, new GameHostInfo(host));
-        }
+        Set<GameHost> oldHosts = Sets.newHashSet(_hostInfo.keySet());
 
         // remove old ones
-        for (GameHost host : Sets.newHashSet(Sets.difference(_hostInfo.keySet(), hosts))) {
-            _hostInfo.remove(host);
+        _hostInfo.keySet().removeAll(Sets.difference(oldHosts, hosts));
+
+        // add new ones
+        for (GameHost host : Sets.difference(hosts, oldHosts)) {
+            _hostInfo.put(host, new GameHostInfo(host));
         }
     }
 
@@ -223,7 +223,7 @@ public class SlinkLoginManager
             }));
 
         if (!infos.isEmpty()) {
-            GameHostInfo info = Collections.min(infos, GameHostInfo.BY_LOGIN);
+            GameHostInfo info = GameHostInfo.BY_LOGIN.min(infos);
             log.info("Attempting login to game host", "host", info.host);
             _client.setServer(info.host.name, new int[] {info.host.port});
             info.lastLoginTime = System.currentTimeMillis();
@@ -321,15 +321,9 @@ public class SlinkLoginManager
      */
     protected static class GameHostInfo
     {
-        public static final Comparator<GameHostInfo> BY_LOGIN = new Comparator<GameHostInfo>() {
+        public static final Ordering<GameHostInfo> BY_LOGIN = new Ordering<GameHostInfo>() {
             @Override public int compare (GameHostInfo o1, GameHostInfo o2) {
-                if (o1.lastLoginTime < o2.lastLoginTime) {
-                    return -1;
-                }
-                if (o1.lastLoginTime > o2.lastLoginTime) {
-                    return 1;
-                }
-                return 0;
+                return Longs.compare(o1.lastLoginTime, o2.lastLoginTime);
             }
         };
 
