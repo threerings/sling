@@ -11,7 +11,6 @@ import java.util.Set;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
