@@ -116,6 +116,7 @@ public class AdvancedEventSearchPanel extends FlowPanel
         for (EventFilter.Type type : new EventFilter.Type[] {
             EventFilter.Type.CHAT_HISTORY_MATCHES,
             EventFilter.Type.GAME_NAME_IS,
+            EventFilter.Type.ACCOUNT_NAME_IS,
             EventFilter.Type.NOTE_MATCHES,
             EventFilter.Type.OWNER_IS,
             EventFilter.Type.SUBJECT_MATCHES,
@@ -225,6 +226,7 @@ public class AdvancedEventSearchPanel extends FlowPanel
                 .add(EventFilter.Type.OWNER_IS, _msgs.owner())
                 .add(EventFilter.Type.OWNER_ID_IS, _msgs.ownerId())
                 .add(EventFilter.Type.GAME_NAME_IS, _msgs.gameName())
+                .add(EventFilter.Type.ACCOUNT_NAME_IS, _msgs.accountName())
                 .add(EventFilter.Type.SUBJECT_MATCHES, _msgs.subject())
                 .add(EventFilter.Type.CHAT_HISTORY_MATCHES, _msgs.chatHistory())
                 .add(EventFilter.Type.NOTE_MATCHES, _msgs.notes())
@@ -284,6 +286,10 @@ public class AdvancedEventSearchPanel extends FlowPanel
                 add(Widgets.newLabel(_msgs.isEqualTo()));
                 add(Widgets.newTextBox(filter.getGameName(), 230, 50));
                 break;
+            case ACCOUNT_NAME_IS:
+                add(Widgets.newLabel(_msgs.isEqualTo()));
+                add(Widgets.newTextBox(filter.getAccountName(), 128, 50));
+                break;
             case OWNER_ID_IS:
                 add(Widgets.newLabel(_msgs.isEqualTo()));
                 add(NumberTextBox.newIntBox(24, 6));
@@ -329,6 +335,8 @@ public class AdvancedEventSearchPanel extends FlowPanel
                 return EventFilter.subjectMatches(getNonEmptyText(1, popupError));
             case GAME_NAME_IS:
                 return EventFilter.gameNameIs(getNonEmptyText(1, popupError));
+            case ACCOUNT_NAME_IS:
+                return EventFilter.accountNameIs(getNonEmptyText(1, popupError));
             case HAS_NOTE:
                 return EventFilter.hasNote();
             case OWNER_IS:

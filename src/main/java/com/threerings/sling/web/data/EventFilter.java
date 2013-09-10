@@ -18,9 +18,9 @@ public class EventFilter
     public enum Type
     {
         TYPE_IS, TYPE_IS_IN, STATUS_IS, HAS_NOTE, CREATED_BETWEEN, UPDATED_BETWEEN, OWNER_IS,
-        OWNER_ID_IS, GAME_NAME_IS, SUBJECT_MATCHES, CHAT_HISTORY_MATCHES, NOTE_MATCHES,
-        FIRST_RESPONSE_IS_MORE_THAN, IP_ADDRESS_IS, MACHINE_IDENT_IS, WAITING_FOR_PLAYER,
-        LANGUAGE_IS;
+        OWNER_ID_IS, GAME_NAME_IS, ACCOUNT_NAME_IS, SUBJECT_MATCHES, CHAT_HISTORY_MATCHES,
+        NOTE_MATCHES, FIRST_RESPONSE_IS_MORE_THAN, IP_ADDRESS_IS, MACHINE_IDENT_IS,
+        WAITING_FOR_PLAYER, LANGUAGE_IS;
     }
 
     public static EventFilter typeIs (Event.Type type)
@@ -58,7 +58,6 @@ public class EventFilter
         return new EventFilter(Type.OWNER_IS, owner);
     }
 
-    //public static EventFilter hasOwner ()
     public static EventFilter ownerIdIs (int ownerId)
     {
         return new EventFilter(Type.OWNER_ID_IS, String.valueOf(ownerId));
@@ -67,6 +66,11 @@ public class EventFilter
     public static EventFilter gameNameIs (String gameName)
     {
         return new EventFilter(Type.GAME_NAME_IS, gameName);
+    }
+
+    public static EventFilter accountNameIs (String accountName)
+    {
+        return new EventFilter(Type.ACCOUNT_NAME_IS, accountName);
     }
 
     public static EventFilter subjectMatches (String terms)
@@ -165,6 +169,12 @@ public class EventFilter
     public String getGameName ()
     {
         requireType(Type.GAME_NAME_IS);
+        return _query;
+    }
+
+    public String getAccountName ()
+    {
+        requireType(Type.ACCOUNT_NAME_IS);
         return _query;
     }
 

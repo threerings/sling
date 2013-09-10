@@ -129,6 +129,11 @@ public class SlingRepository extends DepotRepository
             case SUBJECT_MATCHES:
                 primaries.add(termSearch(EventRecord.SUBJECT, filter.getSearchTerms()));
                 break;
+            case ACCOUNT_NAME_IS:
+                primaries.add(Ops.or(
+                    lowerEq(EventRecord.SOURCE, filter.getAccountName()),
+                    lowerEq(EventRecord.TARGET, filter.getAccountName())));
+                break;
             case GAME_NAME_IS:
                 primaries.add(Ops.or(
                     lowerEq(EventRecord.SOURCE_HANDLE, filter.getGameName()),
