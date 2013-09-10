@@ -13,7 +13,6 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.Button;
@@ -361,7 +360,7 @@ public abstract class ReportPanel<T> extends FlowPanel
         int row = _inputs.getRowCount();
         _inputs.cell(row, 1).widget(btn);
 
-        _callback = new MyClickCallback<T>(btn) {
+        _callback = new ClickCallback<T>(btn) {
             @Override protected boolean callService () {
                 PageAddress address = ReportPanel.this.callService();
                 if (address != null) {
@@ -384,22 +383,6 @@ public abstract class ReportPanel<T> extends FlowPanel
 
         if (run) {
             _callback.click();
-        }
-    }
-
-    // TODO: I've been thinking lately it would be really nice if ClickCallback had a way to
-    // "click the button" automatically. This is mostly because GWT's Button.click seems to do
-    // nothing. Kludgy subclass for now.
-    protected static abstract class MyClickCallback<T> extends ClickCallback<T>
-    {
-        public MyClickCallback (HasClickHandlers trigger)
-        {
-            super(trigger);
-        }
-
-        public void click ()
-        {
-            takeAction(false);
         }
     }
 
@@ -430,7 +413,7 @@ public abstract class ReportPanel<T> extends FlowPanel
     protected SmartTable _inputs = new SmartTable("Inputs", 0, 0);
     protected Label _resultHdr = Widgets.newLabel("", "ResultHeader");
     protected SimplePanel _result = new SimplePanel();
-    protected MyClickCallback<T> _callback;
+    protected ClickCallback<T> _callback;
 
     protected static final DateTimeFormat DAY_FMT = DateTimeFormat.getFormat("EEE MMM dd");
     protected static final DateTimeFormat TIME_FMT = DateTimeFormat.getFormat("EEE MMM dd hh:mm");
