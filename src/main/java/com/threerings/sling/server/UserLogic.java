@@ -29,6 +29,7 @@ import com.google.inject.name.Named;
 
 import com.samskivert.net.MailUtil;
 import com.samskivert.util.Tuple;
+import com.samskivert.util.Config;
 
 import com.samskivert.servlet.SiteIdentifier;
 import com.samskivert.servlet.user.AuthenticationFailedException;
@@ -142,6 +143,13 @@ public class UserLogic
         throws SlingException
     {
         OOOUser user = _userRepo.loadUser(accountName, false);
+        String[] partnersPrefix = _config.getValue("partner_prefixes", new String[0]);
+        for(String partner : partnersPrefix) {
+            if (user != null) {
+                break;
+            }
+            user = _userRepo.loadUser(partner + accountName, false);
+        }
         return (user == null) ? null : toAccount(siteId, user);
     }
 
@@ -524,6 +532,7 @@ public class UserLogic
     @Inject protected GameInfoProvider _infoProvider;
     @Inject protected DepotUserRepository _userRepo;
     @Inject protected SiteIdentifier _siteIdentifier;
+    @Inject protected Config _config;
 
     protected Supplier<DepotUserManager> _userMgr;
 
