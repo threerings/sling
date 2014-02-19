@@ -45,7 +45,7 @@ public class SampleServletConfig extends GuiceServletContextListener
                 new StaticConnectionProvider(new Config("test").getSubProperties("db"));
 
             // Create message manager
-            MessageManager msgmgr = new MessageManager("rsrc.i18n");
+            bind(MessageManager.class).toInstance(new MessageManager("rsrc.i18n"));
 
             // context for various user and sling depot repositories
             PersistenceContext userPctx = new PersistenceContext("userdb", conprov, null);
