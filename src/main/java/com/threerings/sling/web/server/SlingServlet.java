@@ -80,6 +80,8 @@ import com.threerings.sling.web.data.UniversalTime;
 import com.threerings.sling.web.data.UserPetition;
 import com.threerings.sling.web.util.SimpleCache;
 import com.threerings.user.OOOUser;
+import com.threerings.util.MessageBundle;
+import com.threerings.util.MessageManager;
 
 import static com.threerings.sling.Log.log;
 
@@ -95,6 +97,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         super.init(config);
         log.info("Sling servlet initialized", "tz", TimeZone.getDefault());
+        _msgs = _msgmgr.getBundle("sling");
     }
 
     // from SlingService
@@ -224,11 +227,11 @@ public abstract class SlingServlet extends RemoteServiceServlet
             _actionHandler.ban(account.name.accountName);
             _actionHandler.warn(account.name.accountName, reason);
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, account.name.accountName,
-                "Banned: \"" + reason + "\"");
+                _msgs.get("m.banned", reason));
         } else {
             _actionHandler.warn(account.name.accountName, null);
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, account.name.accountName,
-                "Unbanned");
+                _msgs.get("m.unbanned"));
         }
         updateRelatedAccounts(account, banned);
     }
@@ -251,10 +254,10 @@ public abstract class SlingServlet extends RemoteServiceServlet
         // record the temp ban
         if (days == 0) {
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, accountName,
-                "Cleared temp-ban");
+                _msgs.get("m.cleared_temp_ban"));
         } else {
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, accountName,
-                "Temp Ban: " + days + " days, for \"" + warning + "\"");
+                _msgs.get("m.temp_ban", days, warning));
         }
     }
 
@@ -268,21 +271,22 @@ public abstract class SlingServlet extends RemoteServiceServlet
 
         // record the warning
         if (warning == null) {
-            recordEvent(Event.Type.SUPPORT_ACTION, caller.username, accountName, "Cleared warning");
+            recordEvent(Event.Type.SUPPORT_ACTION, caller.username,
+                accountName, _msgs.get("m.cleared_warning"));
         } else {
-            String reason = "Warned for:";
+            String reason = "m.warned";
             Account account = _userLogic.getAccountByName(getSiteId(), accountName);
             if (account != null) {
                 if (account.isSet(Account.Flag.BANNED)) {
-                    reason = "Changed Banned reason to:";
+                    reason = "m.changed_banned_reason";
                 } else if (account.tempBan != null) {
-                    reason = "Changed Temp Ban Warning to:";
+                    reason = "m.changed_temp_ban_reason";
                 } else if (!StringUtil.isBlank(account.warning)) {
-                    reason = "Updated Warning to:";
+                    reason = "m.updated_warning";
                 }
             }
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, accountName,
-                reason + " \"" + warning + "\"");
+                _msgs.get(reason, warning));
         }
     }
 
@@ -1369,6 +1373,10 @@ public abstract class SlingServlet extends RemoteServiceServlet
             return faqs;
         }
     };
+
+    @Inject protected MessageManager _msgmgr;
+
+    protected MessageBundle _msgs;
 
     /** Caches agent last activity times. This is different from a SimpleCache because values
      * are written frequently and read rarely. */

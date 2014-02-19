@@ -53,6 +53,10 @@
   </target>
 
   <target name="compile" depends="gmsgs" description="Compiles main sources.">
+    <mkdir dir="${deploy.dir}/classes"/>
+      <copy todir="${deploy.dir}/classes/rsrc">
+      <fileset dir="rsrc" includes="**/*"/>
+    </copy>
     <!-- compile our server code with build.classpath -->
     <ooojavac srcdir="${src.dir}" destdir="${deploy.dir}/classes" version="1.5"
       classpathref="pom.xml.path"/>

@@ -23,6 +23,7 @@ import com.threerings.sling.server.AbstractGameInfoProvider;
 import com.threerings.sling.server.GameActionHandler;
 import com.threerings.sling.server.GameInfoProvider;
 import com.threerings.user.depot.DepotUserRepository;
+import com.threerings.util.MessageManager;
 
 /**
  * Some sample code for sling servlet config. Currently this doesn't run and sling must be tested
@@ -42,6 +43,9 @@ public class SampleServletConfig extends GuiceServletContextListener
             // set up a provider
             ConnectionProvider conprov =
                 new StaticConnectionProvider(new Config("test").getSubProperties("db"));
+
+            // Create message manager
+            MessageManager msgmgr = new MessageManager("rsrc.i18n");
 
             // context for various user and sling depot repositories
             PersistenceContext userPctx = new PersistenceContext("userdb", conprov, null);
