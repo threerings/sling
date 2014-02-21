@@ -75,6 +75,8 @@ public class AccountsSection<Ctx extends SlingContext>
                     }
                 });
             return container;
+        case CREATE:
+            return new AccountCreationPanel(ctx);
         case SEARCH:
             break; // continued below
         default:

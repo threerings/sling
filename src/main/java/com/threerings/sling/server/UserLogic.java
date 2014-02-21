@@ -35,6 +35,7 @@ import com.samskivert.servlet.SiteIdentifier;
 import com.samskivert.servlet.user.AuthenticationFailedException;
 import com.samskivert.servlet.user.InvalidPasswordException;
 import com.samskivert.servlet.user.Password;
+import com.samskivert.servlet.user.Username;
 
 import com.samskivert.depot.DatabaseException;
 import com.samskivert.depot.PersistenceContext;
@@ -137,6 +138,29 @@ public class UserLogic
         }
         setUserEmail(user, email);
         _userRepo.updateUser(user);
+    }
+
+    public Account createSupportAccount (Username name, String password, String email)
+        throws SlingException
+    {
+        int siteId = OOOUser.DEFAULT_SITE_ID;
+
+        int userId;
+        try {
+            userId = _userRepo.createUser(name, password, email, siteId);
+        } catch (Exception e) {
+            throw new SlingException(e.getMessage());
+        }
+
+        OOOUser user = _userRepo.loadUser(userId);
+        if (user == null) {
+            throw new SlingException("m.internal_error");
+        }
+
+        user.addToken(OOOUser.SUPPORT);
+        _userRepo.updateUser(user);
+
+        return toAccount(siteId, user);
     }
 
     public Account getAccountByName (int siteId, String accountName)

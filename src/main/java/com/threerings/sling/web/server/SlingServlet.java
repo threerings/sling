@@ -49,6 +49,7 @@ import com.samskivert.servlet.user.AuthenticationFailedException;
 import com.samskivert.servlet.user.InvalidPasswordException;
 import com.samskivert.servlet.user.NoSuchUserException;
 import com.samskivert.servlet.util.CookieUtil;
+import com.samskivert.servlet.user.Username;
 
 import com.threerings.gwt.util.PagedRequest;
 import com.threerings.gwt.util.PagedResult;
@@ -80,6 +81,7 @@ import com.threerings.sling.web.data.UniversalTime;
 import com.threerings.sling.web.data.UserPetition;
 import com.threerings.sling.web.util.SimpleCache;
 import com.threerings.user.OOOUser;
+import com.threerings.user.UserDataUtil;
 import com.threerings.util.MessageBundle;
 import com.threerings.util.MessageManager;
 
@@ -174,6 +176,28 @@ public abstract class SlingServlet extends RemoteServiceServlet
             throw new SlingException("m.invalid_email");
         }
         _userLogic.updateEmail(caller, email);
+    }
+
+    // from SlingService
+    @Override public Account createSupportAccount (String name, String password, String email)
+        throws SlingException
+    {
+        requireAuthedSupport();
+
+        Username username;
+        try {
+            username = new Username(name);
+        } catch (Exception e) {
+            throw new SlingException(e.getMessage());
+        }
+
+        try {
+            UserDataUtil.checkPassword(password);
+        } catch (Exception e) {
+            throw new SlingException(e.getMessage());
+        }
+
+        return _userLogic.createSupportAccount(username, password, email);
     }
 
     // from SlingService

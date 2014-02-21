@@ -12,7 +12,7 @@ body {
 table.uMain {
   width: 100%;
   height: 100%;
-  text-align: left; 
+  text-align: left;
 }
 
 /** The application toolbar */
@@ -141,4 +141,11 @@ table.uLoginBar {
 .uTimeRange div, .uTimeRange table.uDate {
   display: inline;
   vertical-align: middle;
+}
+
+.uAccountCreationPanel .Title {
+  font-size: 18pt;
+  font-weight: bold;
+  border-bottom: thick solid black;
+  margin-bottom: 0px;
 }

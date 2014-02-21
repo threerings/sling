@@ -57,6 +57,12 @@ public interface SlingServiceAsync
     public void updateEmail (String email, AsyncCallback<Void> callback);
 
     /**
+     * Create a new account.
+     */
+    public void createSupportAccount (
+            String name, String password, String email, AsyncCallback<Account> callback);
+
+    /**
      * The asynchronous version of {@link SlingService#getAccount}.
      */
     public void getAccount (String name, AsyncCallback<Account> callback);

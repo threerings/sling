@@ -210,6 +210,12 @@ public interface SlingService extends RemoteService
         throws SlingException;
 
     /**
+     * Create a new account.
+     */
+    public Account createSupportAccount (String name, String password, String email)
+        throws SlingException;
+
+    /**
      * Loads and returns the account with the specified name. Admin only.
      */
     public Account getAccount (String name)

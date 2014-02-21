@@ -5,7 +5,7 @@
  */
 
 /* Admin toolbar */
-.uAdminBar .Accounts, .uAdminBar .Events, .uAdminBar .LoginStatus, .uAdminBar .AgentActivity {
+.uAdminBar .Accounts, .uAdminBar .Events, .uAdminBar .LoginStatus, .uAdminBar .CreateAccount, .uAdminBar .AgentActivity {
   font-size: 9pt;
 }
 
@@ -17,7 +17,7 @@
   padding-left: 12px;
 }
 
-.uAdminBar .Accounts div, .uAdminBar .Events div, .uAdminBar .LoginStatus div, .uAdminBar .AgentActivity div {
+.uAdminBar .Accounts div, .uAdminBar .Events div, .uAdminBar .LoginStatus div, .uAdminBar .CreateAccount div, .uAdminBar .AgentActivity div {
   display: inline;
   padding-right: 4px;
 }

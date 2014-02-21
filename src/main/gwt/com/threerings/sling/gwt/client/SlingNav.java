@@ -10,6 +10,7 @@ import com.threerings.sling.gwt.util.Nav;
 import com.threerings.sling.gwt.util.PageAddress;
 import com.threerings.sling.gwt.util.Section;
 import com.threerings.sling.gwt.util.SectionId;
+import com.threerings.sling.web.data.Account;
 import com.threerings.sling.web.client.SlingService;
 import com.threerings.sling.web.data.Event;
 import com.threerings.sling.web.data.EventFilter;
@@ -34,7 +35,7 @@ public class SlingNav
         public static final SectionId ID = new SectionId("accounts");
 
         public static enum Mode {
-            SEARCH, POSTNOTE, RELATED;
+            SEARCH, POSTNOTE, RELATED, CREATE;
         }
 
         public static enum SearchBy {
@@ -65,6 +66,11 @@ public class SlingNav
         {
             return new PageAddress(ID, new Arguments(Nav.toArg(Mode.RELATED),
                 Integer.toString(accountId)));
+        }
+
+        public static PageAddress createAccount ()
+        {
+            return new PageAddress(ID, new Arguments(Nav.toArg(Mode.CREATE)));
         }
     }
 
