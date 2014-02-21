@@ -182,7 +182,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     @Override public Account createSupportAccount (String name, String password, String email)
         throws SlingException
     {
-        requireAuthedSupport();
+        requireAuthedAdmin();
 
         Username username;
         try {
@@ -191,10 +191,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
             throw new SlingException(e.getMessage());
         }
 
-        try {
-            UserDataUtil.checkPassword(password);
-        } catch (Exception e) {
-            throw new SlingException(e.getMessage());
+        if (password.length() < UserDataUtil.MIN_PASSWORD_LENGTH) {
+            throw new SlingException("m.password_too_short");
         }
 
         return _userLogic.createSupportAccount(username, password, email);
@@ -1131,6 +1129,17 @@ public abstract class SlingServlet extends RemoteServiceServlet
         Caller user = requireAuthedUser();
         // make sure they have proper privileges
         if (!user.isJrSupport) {
+            throw new AuthenticationException("m.access_denied");
+        }
+        return user;
+    }
+
+    protected Caller requireAuthedAdmin ()
+        throws SlingException
+    {
+        Caller user = requireAuthedUser();
+        // make sure they have proper privileges
+        if (!user.isAdmin) {
             throw new AuthenticationException("m.access_denied");
         }
         return user;

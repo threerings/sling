@@ -84,6 +84,15 @@ public class SlingContext
         return ainfo != null && ainfo.isJrSupport;
     }
 
+    /**
+     * Returns true if the user is currently authenticed as an admind level user
+     * (not support leve), false otherwise
+     */
+    public boolean isAdmin ()
+    {
+        return ainfo != null && ainfo.isAdmin;
+    }
+
     @Override // from BaseContext
     public AuthLevel getCurrentAuthLevel ()
     {

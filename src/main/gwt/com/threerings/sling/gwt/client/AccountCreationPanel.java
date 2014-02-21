@@ -30,8 +30,8 @@ public class AccountCreationPanel extends FlowPanel
             @Override
             public boolean callService ()
             {
-                _ctx.svc.createSupportAccount(
-                    name.getText(), password.getText(), email.getText(), this);
+                _ctx.svc.createSupportAccount(name.getText(),
+                    _ctx.frame.md5hex(password.getText()), email.getText(), this);
                 return true;
             }
 

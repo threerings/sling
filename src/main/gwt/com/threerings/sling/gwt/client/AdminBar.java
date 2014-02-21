@@ -64,10 +64,12 @@ public class AdminBar extends HorizontalPanel
             Widgets.newLabel(_app.getContext().ainfo.name.accountName),
             logout));
 
-        add(Widgets.newFlowPanel("CreateAccount",
-            Widgets.newLabel("\u2022", "SpacerLabel"),
-            SlingUtils.makeLink(
-                _app.getContext(), _msgs.createAccount(), Accounts.createAccount())));
+        if (_app.getContext().isAdmin()) {
+            add(Widgets.newFlowPanel("CreateAccount",
+                Widgets.newLabel("\u2022", "SpacerLabel"),
+                SlingUtils.makeLink(
+                    _app.getContext(), _msgs.createAccount(), Accounts.createAccount())));
+        }
 
         add(Widgets.newFlowPanel("AgentActivity",
             Widgets.newLabel("\u2022", "SpacerLabel"),
