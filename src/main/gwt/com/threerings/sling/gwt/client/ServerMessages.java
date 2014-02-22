@@ -22,5 +22,4 @@ public interface ServerMessages extends ConstantsWithLookup
     public String game_link_down ();
     public String game_link_rpc_failed ();
     public String invalid_name ();
-    public String password_too_short ();
 }

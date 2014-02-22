@@ -191,10 +191,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
             throw new SlingException(e.getMessage());
         }
 
-        if (password.length() < UserDataUtil.MIN_PASSWORD_LENGTH) {
-            throw new SlingException("m.password_too_short");
-        }
-
         return _userLogic.createSupportAccount(username, password, email);
     }
 

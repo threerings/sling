@@ -5,6 +5,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 
+import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.SmartTable;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
@@ -25,11 +26,16 @@ public class AccountCreationPanel extends FlowPanel
         final TextBox password = Widgets.newTextBox("", 35, 35);
         final TextBox email = Widgets.newTextBox("", 50, 50);
 
-        Button create = new Button(_msgs.accountCreateButton());
+        final Button create = new Button(_msgs.accountCreateButton());
         new ClickCallback<Account>(create) {
             @Override
             public boolean callService ()
             {
+                if (password.getText().length() < 4) {
+                    Popups.errorBelow(_msgs.passwordTooShort(), create);
+                    return false;
+                }
+
                 _ctx.svc.createSupportAccount(name.getText(),
                     _ctx.frame.md5hex(password.getText()), email.getText(), this);
                 return true;
