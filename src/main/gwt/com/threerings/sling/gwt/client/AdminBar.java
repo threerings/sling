@@ -71,6 +71,9 @@ public class AdminBar extends VerticalPanel
             Widgets.newLabel(_app.getContext().ainfo.name.accountName),
             logout));
 
+        row = Widgets.newRow("AdminRow");
+        add(row);
+
         if (_app.getContext().isAdmin()) {
             row.add(Widgets.newFlowPanel("CreateAccount",
                 Widgets.newLabel("\u2022", "SpacerLabel"),
@@ -78,8 +81,6 @@ public class AdminBar extends VerticalPanel
                     _app.getContext(), _msgs.createAccount(), Accounts.createAccount())));
         }
 
-        row = Widgets.newRow("AdminRow");
-        add(row);
         row.add(Widgets.newFlowPanel("AgentActivity",
             Widgets.newLabel("\u2022", "SpacerLabel"),
             SlingUtils.makeLink(_app.getContext(), _msgs.agentActivity(), Reports.agentActivity())));
