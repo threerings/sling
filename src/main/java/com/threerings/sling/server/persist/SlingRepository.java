@@ -40,7 +40,6 @@ import com.threerings.sling.web.data.Event;
 import com.threerings.sling.web.data.EventFilter;
 import com.threerings.sling.web.data.EventSearch;
 import com.threerings.sling.web.data.TimeRange;
-import com.threerings.sling.web.data.UniversalTime;
 
 /**
  * Manages various support persistent data.
@@ -156,8 +155,8 @@ public class SlingRepository extends DepotRepository
                 ColumnExp<Timestamp> dcol = DATE_COLS.get(filter.type);
                 TimeRange range = filter.getTimeRange();
                 primaries.add(Ops.and(
-                    dcol.greaterEq(new Timestamp(range.from.getTime())),
-                    dcol.lessThan(new Timestamp(range.to.getTime()))));
+                    dcol.greaterEq(new Timestamp(range.from)),
+                    dcol.lessThan(new Timestamp(range.to))));
                 break;
             case STATUS_IS:
                 primaries.add(EventRecord.STATUS.eq(filter.getEventStatus()));
@@ -214,7 +213,7 @@ public class SlingRepository extends DepotRepository
      * to events reported in the given time range.
      */
     public int[][] getVolumeByDayAndHour (
-        UniversalTime from, UniversalTime to, Collection<Event.Type> types)
+        long from, long to, Collection<Event.Type> types)
     {
         int[][] volumes = new int[7][];
         for (int ii = 0; ii < volumes.length; ++ii) {
@@ -224,8 +223,8 @@ public class SlingRepository extends DepotRepository
         SQLExpression<Number> dayOfWeek = DateFuncs.dayOfWeek(EventRecord.ENTERED);
         SQLExpression<Number> hour = DateFuncs.hour(EventRecord.ENTERED);
         Where where = new Where(Ops.and(
-            EventRecord.ENTERED.greaterEq(new Timestamp(from.getTime())),
-            EventRecord.ENTERED.lessThan(new Timestamp(to.getTime())),
+            EventRecord.ENTERED.greaterEq(new Timestamp(from)),
+            EventRecord.ENTERED.lessThan(new Timestamp(to)),
             EventRecord.TYPE.in(types)));
 
         for (Tuple3<Number, Number, Number> tup : from(EventRecord.class).where(where)
@@ -418,11 +417,11 @@ public class SlingRepository extends DepotRepository
     /**
      * Gets a map of all agent activity time stamps.
      */
-    public Map<String, UniversalTime> getAgentActivity()
+    public Map<String, Long> getAgentActivity()
     {
-        Map<String, UniversalTime> activity = Maps.newHashMap();
+        Map<String, Long> activity = Maps.newHashMap();
         for (AgentActivityRecord rec : findAll(AgentActivityRecord.class)) {
-            activity.put(rec.accountName, UniversalTime.fromDate(rec.time));
+            activity.put(rec.accountName, rec.time.getTime());
         }
         return activity;
     }

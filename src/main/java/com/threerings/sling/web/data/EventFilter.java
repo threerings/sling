@@ -150,8 +150,8 @@ public class EventFilter
         requireType(Type.CREATED_BETWEEN, Type.UPDATED_BETWEEN);
         int slashPos = _query.indexOf("/");
         return new TimeRange(
-            UniversalTime.fromMillis(Long.valueOf(_query.substring(0, slashPos))),
-            UniversalTime.fromMillis(Long.valueOf(_query.substring(slashPos + 1))));
+            Long.valueOf(_query.substring(0, slashPos)),
+            Long.valueOf(_query.substring(slashPos + 1)));
     }
 
     public String getOwner ()
@@ -244,7 +244,7 @@ public class EventFilter
 
     protected static String flatten (TimeRange range)
     {
-        return range.from.getTime() + "/" + range.to.getTime();
+        return range.from + "/" + range.to;
     }
 
     protected static String flatten (Set<Event.Type> types)

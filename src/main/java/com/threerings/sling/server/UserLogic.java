@@ -44,7 +44,6 @@ import com.threerings.sling.web.client.SlingException;
 import com.threerings.sling.web.data.Account;
 import com.threerings.sling.web.data.AccountName;
 import com.threerings.sling.web.data.MachineIdentity;
-import com.threerings.sling.web.data.UniversalTime;
 import com.threerings.user.OOOUser;
 import com.threerings.user.OOOUserCard;
 import com.threerings.user.depot.DepotUserManager;
@@ -448,7 +447,7 @@ public class UserLogic
         account.accountId = user.userId;
         account.name = resolveName(username);
         account.email = user.email;
-        account.created = UniversalTime.fromDate(user.created);
+        account.created = user.created.getTime();
         account.affiliate = _siteIdentifier.getSiteString(user.siteId);
 
         account.set(Account.Flag.HAS_BOUGHT_COINS, user.hasBoughtCoins());

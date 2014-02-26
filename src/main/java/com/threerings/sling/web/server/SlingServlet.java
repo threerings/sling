@@ -11,7 +11,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -33,6 +32,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Longs;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.UnexpectedException;
@@ -77,11 +77,9 @@ import com.threerings.sling.web.data.MachineIdentity;
 import com.threerings.sling.web.data.Message;
 import com.threerings.sling.web.data.Question;
 import com.threerings.sling.web.data.TimeRange;
-import com.threerings.sling.web.data.UniversalTime;
 import com.threerings.sling.web.data.UserPetition;
 import com.threerings.sling.web.util.SimpleCache;
 import com.threerings.user.OOOUser;
-import com.threerings.user.UserDataUtil;
 import com.threerings.util.MessageBundle;
 import com.threerings.util.MessageManager;
 
@@ -366,7 +364,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         List<UserPetition> result = Lists.newArrayList(petitions.values());
         Collections.sort(result, new Comparator<UserPetition>() {
             public int compare (UserPetition one, UserPetition two) {
-                return two.entered.compareTo(one.entered);
+                return Longs.compare(two.entered, one.entered);
             }
         });
         return result;
@@ -446,12 +444,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
                 }
                 search.filters.set(ii, EventFilter.ownerIs(owner.name.accountName));
             }
-
-            try {
-                dbgLog("EventSearch.filters", filter.getTimeRange());
-            } catch (IllegalStateException ex) {
-
-            }
         }
 
         SlingRepository.PagedQuery<EventRecord> query = _slingRepo.searchEvents(search);
@@ -470,8 +462,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         requireAuthedSupport();
 
-        dbgLog("CheckResponse", range);
-
         EventResponses result = new EventResponses();
         EventSearch search = new EventSearch(
             EventFilter.createdIn(range),
@@ -483,14 +473,12 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     // from SlingService
-    @Override public EventVolume getVolume (UniversalTime now, TimeUnit timeUnit, int count)
+    @Override public EventVolume getVolume (long now, TimeUnit timeUnit, int count)
         throws SlingException
     {
         requireAuthedSupport();
 
-        dbgLog("GetVolume", now);
-
-        Calendars.Builder cal = Calendars.at(now.getTime());
+        Calendars.Builder cal = Calendars.at(now);
 
         // translate time units and make sure now is on a boundary
         int calUnit;
@@ -513,13 +501,13 @@ public abstract class SlingServlet extends RemoteServiceServlet
         EventFilter userReported = EventFilter.typeIsIn(Sets.newHashSet(
             Event.Type.COMPLAINT, Event.Type.PETITION));
         EventVolume volume = new EventVolume();
-        volume.begin = UniversalTime.fromDate(d1.getTime());
+        volume.begin = d1.getTimeInMillis();
         volume.eventCounts = new int[count];
         for (int ii = 0; ii < count; ++ii) {
             volume.eventCounts[ii] = _slingRepo.searchEvents(new EventSearch(
                 EventFilter.createdIn(new TimeRange(
-                    UniversalTime.fromDate(d1.getTime()),
-                    UniversalTime.fromDate(d2.getTime()))),
+                    d1.getTimeInMillis(),
+                    d2.getTimeInMillis())),
                 userReported)).count();
             d1.add(calUnit, 1);
             d2.add(calUnit, 1);
@@ -535,18 +523,16 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         requireAuthedSupport();
 
-        dbgLog("AverageVolume", range);
-
         // no coping with hours
         range = new TimeRange(
-            Calendars.at(range.from.getTime()).zeroTime().toTime(),
-            Calendars.at(range.to.getTime()).zeroTime().toTime());
+            Calendars.at(range.from).zeroTime().toTime(),
+            Calendars.at(range.to).zeroTime().toTime());
 
         // count the number of each day of the week in the interval. this will form the denominator
         // for the average
         int[] dayCounts = new int[7];
-        for (Calendar cc = Calendars.at(range.from.getTime()).asCalendar();
-            cc.getTimeInMillis() < range.to.getTime(); cc.add(Calendar.DATE, 1)) {
+        for (Calendar cc = Calendars.at(range.from).asCalendar();
+            cc.getTimeInMillis() < range.to; cc.add(Calendar.DATE, 1)) {
             dayCounts[cc.get(Calendar.DAY_OF_WEEK) - 1]++;
         }
 
@@ -568,7 +554,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     // from SlingService
-    @Override public Map<String, UniversalTime> getAgentActivity ()
+    @Override public Map<String, Long> getAgentActivity ()
         throws SlingException
     {
         requireAuthedSupport();
@@ -589,9 +575,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         accounts.add(evrec.target);
         accounts.add(evrec.owner);
         Map<String, AccountName> names = _userLogic.resolveNames(accounts);
-        Event event = evrec.toEvent(names);
-        dbgLog("Event.entered", event.entered);
-        return event;
+        return evrec.toEvent(names);
     }
 
     // from SlingService
@@ -1301,26 +1285,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
         }
         long now = _slingRepo.noteAgentActivity(accountName);
         _activityWriteCache.put(accountName, now);
-    }
-
-    protected static void dbgLog (String debug, TimeRange range)
-    {
-        if (range == null) {
-            return;
-        }
-        dbgLog(debug + " from", range.from);
-        dbgLog(debug + " to", range.to);
-    }
-
-    protected static void dbgLog (String desc, UniversalTime time)
-    {
-        boolean enabled = false;
-        if (!enabled || time == null) {
-            return;
-        }
-        long millis = time.getTime();
-        log.info(desc, "date", DBG_FMT.format(new Date(millis)), "millis", millis,
-            "tod", millis % 86400000);
     }
 
     /** Provides access to all of our dependencies. */

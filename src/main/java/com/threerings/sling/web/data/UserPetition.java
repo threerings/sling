@@ -16,8 +16,8 @@ public class UserPetition
     /** A unique identifier for this petition. */
     public int eventId;
 
-    /** The time at which this petition was entered into the system. */
-    public UniversalTime entered;
+    /** The time at which this petition was entered into the system (UTC). */
+    public long entered;
 
     /** Indicates the status of this petition. */
     public Event.Status status;

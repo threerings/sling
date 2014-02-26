@@ -10,8 +10,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class TimeRange implements IsSerializable
 {
-    public UniversalTime from;
-    public UniversalTime to;
+    public long from;
+    public long to;
 
     public TimeRange ()
     {
@@ -19,12 +19,7 @@ public class TimeRange implements IsSerializable
 
     public TimeRange (long from, long to)
     {
-        this(UniversalTime.fromMillis(from), UniversalTime.fromMillis(to));
-    }
-
-    public TimeRange (UniversalTime from, UniversalTime to)
-    {
-        if (from.after(to)) {
+        if (from > to) {
             this.from = to;
             this.to = from;
         } else {

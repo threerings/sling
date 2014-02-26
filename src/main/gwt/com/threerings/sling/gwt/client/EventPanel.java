@@ -39,7 +39,6 @@ import com.threerings.sling.web.client.SlingService.PostMessageResult;
 import com.threerings.sling.web.client.SlingService.TimeUnit;
 import com.threerings.sling.web.data.Event;
 import com.threerings.sling.web.data.Message;
-import com.threerings.sling.web.data.UniversalTime;
 
 import static com.threerings.sling.gwt.client.SlingUtils.translateServerError;
 
@@ -350,7 +349,7 @@ public class EventPanel extends FlowPanel
 
     protected void eventTouched ()
     {
-        _event.lastUpdated = UniversalTime.now();
+        _event.lastUpdated = System.currentTimeMillis();
         _fields.cell("lastUpdated", 1).text(ServerTime.from(_event.lastUpdated).format());
     }
 

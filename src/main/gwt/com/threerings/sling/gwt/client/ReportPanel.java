@@ -12,6 +12,7 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Longs;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -41,7 +42,6 @@ import com.threerings.sling.web.data.Event;
 import com.threerings.sling.web.data.EventFilter;
 import com.threerings.sling.web.data.EventSearch;
 import com.threerings.sling.web.data.TimeRange;
-import com.threerings.sling.web.data.UniversalTime;
 
 /**
  * Superclass and static methods for generating reports.
@@ -200,7 +200,7 @@ public abstract class ReportPanel<T> extends FlowPanel
         final NumberTextBox countCtrl = NumberTextBox.newIntBox(3, 2).withValue(count);
 
         return new ReportPanel<EventVolume>(ctx, _msgs.recentEventVolumeTitle(), run) {
-            UniversalTime now;
+            long now;
             TimeUnit unit;
             int count;
 
@@ -212,7 +212,7 @@ public abstract class ReportPanel<T> extends FlowPanel
             @Override protected PageAddress callService () {
                 unit = timeUnitsCtrl.getSelectedItem();
                 count = countCtrl.getNumber().intValue();
-                now = UniversalTime.now();
+                now = System.currentTimeMillis();
                 _ctx.svc.getVolume(now, unit, count, _callback);
                 return Reports.recentVolume(unit, count);
             }
@@ -225,7 +225,7 @@ public abstract class ReportPanel<T> extends FlowPanel
                 table.cell(0, 1).widget(Widgets.newLabel(_msgs.volumeHdr()))
                     .styles("Header", "col1");
                 for (int ii = 0; ii < result.eventCounts.length; ++ii) {
-                    UniversalTime d = result.begin.addMillis(unit.millis * ii);
+                    long d = result.begin + unit.millis * ii;
                     table.cell(ii + 1, 0).widget(Widgets.newLabel(ServerTime.from(d).format(fmt)))
                         .styles("col0");
                     table.cell(ii + 1, 1).widget(Widgets.newLabel(String.valueOf(
@@ -300,19 +300,17 @@ public abstract class ReportPanel<T> extends FlowPanel
         };
     }
 
-    protected static Comparator<Map.Entry<String, UniversalTime>> BY_TIME_VALUE =
-            new Comparator<Map.Entry<String, UniversalTime>>() {
-        public int compare (Map.Entry<String, UniversalTime> e1, Map.Entry<String, UniversalTime> e2) {
-            UniversalTime t1 = e1.getValue();
-            UniversalTime t2 = e2.getValue();
-            return t1.before(t2) ? 1 : t1.after(t2) ? -1 : 0;
+    protected static Comparator<Map.Entry<String, Long>> BY_TIME_VALUE =
+            new Comparator<Map.Entry<String, Long>>() {
+        public int compare (Map.Entry<String, Long> e1, Map.Entry<String, Long> e2) {
+            return Longs.compare(e2.getValue(), e1.getValue());
         }
     };
 
     protected static Widget newAgentActivity (
         SlingContext ctx, boolean run)
     {
-        return new ReportPanel<Map<String, UniversalTime>>(ctx, _msgs.agentActivityTitle(), run) {
+        return new ReportPanel<Map<String, Long>>(ctx, _msgs.agentActivityTitle(), run) {
             @Override protected void addInputs () {
             }
 
@@ -321,15 +319,15 @@ public abstract class ReportPanel<T> extends FlowPanel
                 return Reports.agentActivity();
             }
 
-            @Override protected Widget createResultWidget (Map<String, UniversalTime> result) {
-                List<Map.Entry<String, UniversalTime>> entries = Lists.newArrayList(result.entrySet());
+            @Override protected Widget createResultWidget (Map<String, Long> result) {
+                List<Map.Entry<String, Long>> entries = Lists.newArrayList(result.entrySet());
                 Collections.sort(entries, BY_TIME_VALUE);
                 SmartTable table = new SmartTable("AgentActivity", 0, 0);
                 int row = 0;
                 table.cell(row++, 0)
                     .widget(Widgets.newLabel("Agent")).styles("Header", "col0").nextCol()
                     .widget(Widgets.newLabel("Time")).styles("Header", "col1");
-                for (Map.Entry<String, UniversalTime> e : entries) {
+                for (Map.Entry<String, Long> e : entries) {
                     Widget link = SlingUtils.makeLink(_ctx, e.getKey(), SlingNav.Events.search(
                         new EventSearch(EventFilter.ownerIs(e.getKey()))));
                     String time = ServerTime.from(e.getValue()).formatReadably();

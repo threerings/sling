@@ -9,7 +9,6 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 
 import com.threerings.sling.web.data.TimeRange;
-import com.threerings.sling.web.data.UniversalTime;
 
 /**
  * Some useful methods for handling gwt webapp navigation.
@@ -39,27 +38,11 @@ public class Nav
     }
 
     /**
-     * Converts a universal time to an argument.
-     */
-    public static String toArg (UniversalTime time)
-    {
-        return String.valueOf(time.getTime());
-    }
-
-    /**
-     * Gets a universal time from an argument.
-     */
-    public static UniversalTime asTime (String arg)
-    {
-        return UniversalTime.fromMillis(Long.valueOf(arg));
-    }
-
-    /**
      * Converts a time range to an argument.
      */
     public static String toArg (TimeRange range)
     {
-        return toArg(range.from) + "/" + toArg(range.to);
+        return range.from + "/" + range.to;
     }
 
     /**
@@ -69,8 +52,8 @@ public class Nav
     {
         int slashPos = arg.indexOf("/");
         return new TimeRange(
-            asTime(arg.substring(0, slashPos)),
-            asTime(arg.substring(slashPos + 1)));
+            Long.valueOf(arg.substring(0, slashPos)),
+            Long.valueOf(arg.substring(slashPos + 1)));
     }
 
     /**

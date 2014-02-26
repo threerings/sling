@@ -10,7 +10,6 @@ import com.threerings.sling.gwt.util.Nav;
 import com.threerings.sling.gwt.util.PageAddress;
 import com.threerings.sling.gwt.util.Section;
 import com.threerings.sling.gwt.util.SectionId;
-import com.threerings.sling.web.data.Account;
 import com.threerings.sling.web.client.SlingService;
 import com.threerings.sling.web.data.Event;
 import com.threerings.sling.web.data.EventFilter;

@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.InputException;
 import com.threerings.sling.web.data.TimeRange;
-import com.threerings.sling.web.data.UniversalTime;
 
 /**
  * Widget containing two date widgets and providing conversions to and from {@link TimeRange}.
@@ -59,7 +58,7 @@ public class TimeRangeWidget extends Composite
      */
     public TimeRange getRange (boolean popupError)
     {
-        UniversalTime from, to;
+        Long from, to;
         if ((from = this.from.getTime(popupError)) == null ||
                 (to = this.to.getTime(popupError)) == null) {
             return null;

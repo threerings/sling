@@ -17,7 +17,6 @@ import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.InputException;
 import com.threerings.sling.gwt.util.ServerTime;
-import com.threerings.sling.web.data.UniversalTime;
 
 /**
  * A text entry widget for a date, optionally allowing time as well. For easy typing, handles MM/DD
@@ -36,7 +35,7 @@ public class ServerTimeWidget extends Composite
      * Creates a new widget set to the date part of the given time. The time component is ignored
      * and may not be entered.
      */
-    public ServerTimeWidget (UniversalTime value)
+    public ServerTimeWidget (long value)
     {
         this(value, false);
     }
@@ -46,7 +45,7 @@ public class ServerTimeWidget extends Composite
      * time is not allowed, then only the year, month and day are edited and the time returned by
      * {@link #getTime()} will be at midnight (all time fields set to zero).
      */
-    public ServerTimeWidget (UniversalTime value, boolean allowTime)
+    public ServerTimeWidget (long value, boolean allowTime)
     {
         initWidget(_hpanel = new HorizontalPanel());
         setStyleName("uDate");
@@ -69,7 +68,7 @@ public class ServerTimeWidget extends Composite
      * Sets the date and time displayed. Note that if time is not being edited by this widget,
      * then only the date part is set.
      */
-    public void setTime (UniversalTime utime)
+    public void setTime (long utime)
     {
         ServerTime time = ServerTime.from(utime);
         ServerTime now = ServerTime.now();
@@ -99,7 +98,7 @@ public class ServerTimeWidget extends Composite
      * it will be included. Otherwise, the returned date will be at midnight (have all time fields
      * set to zero).
      */
-    public UniversalTime getTime (boolean popupError)
+    public Long getTime (boolean popupError)
     {
         ServerTime time = getDateOnly(popupError);
         if (time == null || !hasTime()) {
@@ -119,13 +118,13 @@ public class ServerTimeWidget extends Composite
      * to enter the time, then it will be included. Otherwise, the returned date will have no time
      * component.
      */
-    public UniversalTime require ()
+    public long require ()
     {
-        UniversalTime date = getTime(true);
-        if (date == null) {
+        Long time = getTime(true);
+        if (time == null) {
             throw new InputException();
         }
-        return date;
+        return time;
     }
 
     protected long getTimeOfDay (boolean popupError)

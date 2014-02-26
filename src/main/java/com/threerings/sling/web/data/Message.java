@@ -16,8 +16,8 @@ public class Message
         NORMAL, SUPPORT
     };
 
-    /** The date on which this message was authored. */
-    public UniversalTime authored;
+    /** The date on which this message was authored (UTC). */
+    public long authored;
 
     /** The author of this message. */
     public AccountName author;

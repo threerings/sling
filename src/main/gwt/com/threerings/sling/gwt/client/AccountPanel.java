@@ -25,8 +25,8 @@ import com.threerings.gwt.util.InputClickCallback;
 import com.threerings.sling.gwt.client.SlingNav.Accounts;
 import com.threerings.sling.gwt.ui.NamedRowSmartTable;
 import com.threerings.sling.gwt.util.ServerTime;
+import com.threerings.sling.web.client.SlingService.TimeUnit;
 import com.threerings.sling.web.data.Account;
-import com.threerings.sling.web.data.UniversalTime;
 
 /**
  * Displays the properties of an account in a tabular format.
@@ -354,7 +354,7 @@ public class AccountPanel extends NamedRowSmartTable
             protected boolean gotResult (Void result)
             {
                 status.setText(_msgs.tempBanned());
-                _account.tempBan = UniversalTime.now().addDays(_banDays);
+                _account.tempBan = System.currentTimeMillis() + _banDays * TimeUnit.DAY.millis;
                 _account.warning = _banMessage;
                 _updater.update();
                 return true;

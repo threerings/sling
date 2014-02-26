@@ -17,7 +17,6 @@ import com.samskivert.depot.expression.ColumnExp;
 
 import com.threerings.sling.web.data.AccountName;
 import com.threerings.sling.web.data.Message;
-import com.threerings.sling.web.data.UniversalTime;
 
 /**
  * Represents a single message associated with a support event.
@@ -61,7 +60,7 @@ public class MessageRecord extends PersistentRecord
     public Message toMessage (Map<String,AccountName> accounts)
     {
         Message msg = new Message();
-        msg.authored = UniversalTime.fromDate(entered);
+        msg.authored = entered.getTime();
         msg.body = text;
         msg.author = accounts.get(author);
         msg.access = access;

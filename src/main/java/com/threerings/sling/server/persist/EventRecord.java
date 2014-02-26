@@ -21,7 +21,6 @@ import com.samskivert.depot.expression.SQLExpression;
 import com.threerings.sling.web.data.AccountName;
 import com.threerings.sling.web.data.Event.Type;
 import com.threerings.sling.web.data.Event;
-import com.threerings.sling.web.data.UniversalTime;
 import com.threerings.sling.web.data.UserPetition;
 
 /**
@@ -146,7 +145,7 @@ public class EventRecord extends PersistentRecord
         Event event = new Event();
         event.eventId = eventId;
         event.type = type;
-        event.entered = UniversalTime.fromDate(entered);
+        event.entered = entered.getTime();
         event.source = new Event.Participant(sourceHandle != null ?
             new AccountName(source, sourceHandle) : accounts.get(source), sourceIpAddress,
             sourceMachineIdent);
@@ -161,7 +160,7 @@ public class EventRecord extends PersistentRecord
         event.waitingForPlayer = waitingForPlayer;
         event.subject = subject;
         event.chatHistory = chatHistory;
-        event.lastUpdated = UniversalTime.fromDate(lastUpdated);
+        event.lastUpdated = lastUpdated.getTime();
         event.firstResponse = firstResponse;
         event.link = link;
         event.language = language;
@@ -176,7 +175,7 @@ public class EventRecord extends PersistentRecord
 
         UserPetition up = new UserPetition();
         up.eventId = eventId;
-        up.entered = UniversalTime.fromDate(entered);
+        up.entered = entered.getTime();
         up.status = status;
         up.subject = subject;
         up.messages = Lists.newArrayList();

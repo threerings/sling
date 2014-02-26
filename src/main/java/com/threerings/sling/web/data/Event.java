@@ -3,6 +3,7 @@
 
 package com.threerings.sling.web.data;
 
+import com.google.common.primitives.Longs;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import com.samskivert.util.ByteEnum;
@@ -91,11 +92,11 @@ public class Event
     /** The type of this event. */
     public Type type;
 
-    /** The time at which this event was entered into the system. */
-    public UniversalTime entered;
+    /** The time at which this event was entered into the system (UTC). */
+    public long entered;
 
-    /** The time at which this event was last updated. */
-    public UniversalTime lastUpdated;
+    /** The time at which this event was last updated (UTC). */
+    public long lastUpdated;
 
     /** The number of milliseconds after entering at which the first support qualifying action was
      * taken, or null if no such action has been taken. Qualifying actions are:
@@ -153,7 +154,7 @@ public class Event
         if (oevent.status != status) {
             return status.compareTo(oevent.status);
         } else {
-            return oevent.entered.compareTo(entered);
+            return Longs.compare(oevent.entered, entered);
         }
     }
 }

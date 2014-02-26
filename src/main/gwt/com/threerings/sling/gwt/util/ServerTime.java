@@ -11,7 +11,6 @@ import com.google.gwt.i18n.client.TimeZone;
 
 import com.threerings.gwt.util.Console;
 import com.threerings.gwt.util.DateUtil;
-import com.threerings.sling.web.data.UniversalTime;
 
 /**
  * Represents a time value that is offset by the server's time zone. All regular accessors,
@@ -22,9 +21,9 @@ public class ServerTime
     /**
      * Converts a universal time to a server time.
      */
-    public static ServerTime from (UniversalTime time)
+    public static ServerTime from (long time)
     {
-        return new ServerTime(time.getTime(), _serverTimeZoneOffset);
+        return new ServerTime(time, _serverTimeZoneOffset);
     }
 
     /**
@@ -42,7 +41,7 @@ public class ServerTime
      */
     public static ServerTime now ()
     {
-        return from(UniversalTime.now());
+        return from(System.currentTimeMillis());
     }
 
     /**
@@ -163,9 +162,9 @@ public class ServerTime
     /**
      * Converts this server time into a universal time.
      */
-    public UniversalTime toUniversal ()
+    public long toUniversal ()
     {
-        return UniversalTime.fromMillis(getTime() - _serverTimeZoneOffset);
+        return getTime() - _serverTimeZoneOffset;
     }
 
     /**

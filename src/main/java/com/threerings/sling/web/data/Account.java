@@ -45,17 +45,17 @@ public class Account
     /** The tag for the affiliate that referred this user. */
     public String affiliate;
 
-    /** The date on which this account was created. */
-    public UniversalTime created;
+    /** The date on which this account was created (UTC). */
+    public long created;
 
-    /** The date on which this account first logged ion the game. */
-    public UniversalTime firstSession;
+    /** The date on which this account first logged ion the game (UTC). */
+    public Long firstSession;
 
-    /** The date on which this account last logged into the game. */
-    public UniversalTime lastSession;
+    /** The date on which this account last logged into the game (UTC). */
+    public Long lastSession;
 
-    /** The date on which this account's temp ban will end. */
-    public UniversalTime tempBan;
+    /** The date on which this account's temp ban will end (UTC). */
+    public Long tempBan;
 
     /** The current warning for the user. */
     public String warning;

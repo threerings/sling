@@ -27,7 +27,6 @@ import com.threerings.sling.web.data.MachineIdentity;
 import com.threerings.sling.web.data.Message;
 import com.threerings.sling.web.data.Question;
 import com.threerings.sling.web.data.TimeRange;
-import com.threerings.sling.web.data.UniversalTime;
 import com.threerings.sling.web.data.UserPetition;
 
 /**
@@ -162,7 +161,7 @@ public interface SlingServiceAsync
     /**
      * The asynchronous version of {@link SlingService#getVolume}.
      */
-    public void getVolume (UniversalTime now, TimeUnit timeUnit, int count,
+    public void getVolume (long now, TimeUnit timeUnit, int count,
         AsyncCallback<EventVolume> callback);
 
     /**
@@ -174,7 +173,7 @@ public interface SlingServiceAsync
     /**
      * The asynchronous version of {@link SlingService#getAgentActivity}.
      */
-    public void getAgentActivity (AsyncCallback<Map<String, UniversalTime>> callback);
+    public void getAgentActivity (AsyncCallback<Map<String, Long>> callback);
 
     /**
      * The asynchronous version of {@link SlingService#loadMessages}.
