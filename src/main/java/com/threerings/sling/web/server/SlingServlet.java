@@ -1055,8 +1055,15 @@ public abstract class SlingServlet extends RemoteServiceServlet
         ainfo.isMaintainer = caller.isMaintainer;
         if (ainfo.isSupport) {
             String site = _siteIdentifier.getSiteString(getSiteId());
-            ainfo.setUrl(AuthUrl.GAME, _oooconf.getValue(site + ".game_info", ""));
-            ainfo.setUrl(AuthUrl.BILLING, _oooconf.getValue(site + ".billing_info", ""));
+            String url = _oooconf.getValue(site + ".game_info", "");
+            if (!("".equals(url))) {
+                ainfo.setUrl(AuthUrl.GAME, url);
+            }
+
+            url = _oooconf.getValue(site + ".billing_info", "");
+            if (!("".equals(url))) {
+                ainfo.setUrl(AuthUrl.BILLING, url);
+            }
         }
         ainfo.serverInfo = new ServerInfo();
 
