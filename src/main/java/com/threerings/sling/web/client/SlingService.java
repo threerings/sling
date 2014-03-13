@@ -90,6 +90,14 @@ public interface SlingService extends RemoteService
             _externalUrls.put(which, value);
         }
 
+        public void removeUrl (AuthUrl which)
+        {
+            if (_externalUrls == null) {
+                _externalUrls = Maps.newHashMap();
+            }
+            _externalUrls.remove(which);
+        }
+
         // usually relate to the site configuration, may be null if not needed
         protected Map<AuthUrl, String> _externalUrls;
     }
