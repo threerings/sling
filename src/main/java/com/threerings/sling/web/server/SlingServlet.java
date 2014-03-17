@@ -728,15 +728,20 @@ public abstract class SlingServlet extends RemoteServiceServlet
         Caller caller = requireAuthedSupport();
         EventRecord event = requireEvent(eventId);
 
-        String ownerUsername = _userLogic.getSupportUsername(accountName);
-        if (ownerUsername == null) {
+        Account account = _userLogic.getAccountByName(getSiteId(), accountName);
+        if (account == null) {
             throw new SlingException("m.no_such_user");
         }
 
-        AccountName owner = new AccountName(accountName);
+        if (!(account.isSet(Account.Flag.SUPPORT) || account.isSet(Account.Flag.ADMIN) ||
+                account.isSet(Account.Flag.INSIDER))) {
+            throw new SlingException("m.player_not_authorized");
+        }
+
+        AccountName owner = account.name;
 
         // now update the persistent event record
-        _slingRepo.updateEvent(event.eventId, status, ownerUsername);
+        _slingRepo.updateEvent(event.eventId, status, owner.accountName);
 
         // add a message to log this assignment
         MessageRecord msgrec = new MessageRecord();

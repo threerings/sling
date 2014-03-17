@@ -18,6 +18,7 @@ public interface ServerMessages extends ConstantsWithLookup
     public String invalid_email ();
     public String invalid_search ();
     public String no_such_user ();
+    public String player_not_authorized ();
     public String unknown_character ();
     public String game_link_down ();
     public String game_link_rpc_failed ();
