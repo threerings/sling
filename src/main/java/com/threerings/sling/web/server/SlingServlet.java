@@ -723,25 +723,17 @@ public abstract class SlingServlet extends RemoteServiceServlet
 
     // from SlingService
     @Override public AssignEventResult assignEvent (int eventId, Event.Status status,
-        String gameName) throws SlingException
+        String accountName) throws SlingException
     {
         Caller caller = requireAuthedSupport();
         EventRecord event = requireEvent(eventId);
 
-        String ownerUsername = event.owner;
-        AccountName owner = null;
-        for (String name : _infoProvider.lookupAccountNames(gameName)) {
-            String username = _userLogic.getSupportUsername(name);
-            if (username != null) {
-                ownerUsername = username;
-                owner = new AccountName(name, gameName);
-                break;
-            }
-        }
-
-        if (owner == null) {
+        String ownerUsername = _userLogic.getSupportUsername(accountName);
+        if (ownerUsername == null) {
             throw new SlingException("m.no_such_user");
         }
+
+        AccountName owner = new AccountName(accountName);
 
         // now update the persistent event record
         _slingRepo.updateEvent(event.eventId, status, ownerUsername);
