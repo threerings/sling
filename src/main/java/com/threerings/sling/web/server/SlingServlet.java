@@ -733,8 +733,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             throw new SlingException("m.no_such_user");
         }
 
-        if (!(account.isSet(Account.Flag.SUPPORT) || account.isSet(Account.Flag.ADMIN) ||
-                account.isSet(Account.Flag.INSIDER))) {
+        if (!(account.isSet(Account.Flag.SUPPORT) || account.isSet(Account.Flag.ADMIN))) {
             throw new SlingException("m.player_not_authorized");
         }
 
