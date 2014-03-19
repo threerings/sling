@@ -106,7 +106,8 @@ public class EventsTable extends PagedTable<Event>
     protected void didAddRow (final SmartTable table, final int row, Event event)
     {
         // this is kinda messy, maybe PagedTable could better support this pattern... some day
-        table.getRowFormatter().setStyleName(row, event.getStatusStyle());
+        table.setStyleNames(row, 8, event.getStatusStyle());
+        table.setStyleNames(row, 1, event.getTypeStyle());
     }
 
     @Override // from PagedTable

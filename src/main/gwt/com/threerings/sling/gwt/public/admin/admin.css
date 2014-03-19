@@ -198,19 +198,56 @@ table.uEventsTable {
   border-top: 1px solid;
 }
 
-.uEventsTable tr.header {
-  font-weight: bold;
+.uEventsTable tr {
+  background: #F8F8F8;
 }
 
-.uEventsTable tr.unclaimed {
+.uEventsTable tr.header {
+  font-weight: bold;
+  background: #999999;
+}
+
+.uEventsTable td {
+  width: 5%;
+}
+
+.uEventsTable td:nth-child(4) {
+  width: 25%;
+}
+
+.uEventsTable td:nth-child(5) {
+  width: 20%;
+}
+
+.uEventsTable td:nth-child(7) {
+  width: 15%;
+}
+
+.uEventsTable td:nth-child(8) {
+  width: 10%;
+}
+
+.uEventsTable td.support {
+  background: #FF3333;
+}
+
+.uEventsTable td.note {
+  background: #66FF66;
+}
+
+.uEventsTable td.default {
+  background: #FFAC30;
+}
+
+.uEventsTable td.unclaimed {
   background: #FFCCCC;
 }
 
-.uEventsTable tr.claimed {
+.uEventsTable td.claimed {
   background: #99CCFF;
 }
 
-.uEventsTable tr.closed {
+.uEventsTable td.closed {
   background: #CCCCFF;
 }
 

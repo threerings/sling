@@ -132,7 +132,7 @@ public class Event
     public String language;
 
     /**
-     * Returns a string used to style the display of this event.
+     * Returns a string used to style the status display of this event.
      */
     public String getStatusStyle ()
     {
@@ -145,6 +145,23 @@ public class Event
             return "closed";
         default:
             return "unclaimed";
+        }
+    }
+
+    /**
+     * Returns a string used to the style the type display of this event.
+     */
+    public String getTypeStyle ()
+    {
+        switch (type) {
+        case SUPPORT_ACTION:
+            return "support";
+        case NOTE:
+            return "note";
+        case PETITION:
+        case COMPLAINT:
+        default:
+            return "default";
         }
     }
 
