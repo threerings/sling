@@ -54,7 +54,7 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
         row++;
 
         final CheckBox toggleGameNames = new CheckBox(_msgs.showGameNames());
-        final CheckBox toggleInactive = new CheckBox(_msgs.showInactiveAccts());
+        final CheckBox toggleInactive = new CheckBox(_msgs.hideInactiveAccts());
         cell(row, 0).widget(Widgets.newFlowPanel(toggleGameNames, toggleInactive)).colSpan(2);
         row++;
 
@@ -75,7 +75,7 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
             }
         };
 
-        _showInactiveAccounts = toggleInactive;
+        _hideInactiveAccounts = toggleInactive;
         _showGameNames = toggleGameNames;
         toggleGameNames.addValueChangeHandler(refresh);
         toggleInactive.addValueChangeHandler(refresh);
@@ -107,18 +107,22 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
     protected void addNames (FlowPanel container, MachineIdentity ident)
     {
         boolean showGameNames = _showGameNames.getValue();
-        boolean showInactiveAccounts = _showInactiveAccounts.getValue();
+        boolean hideInactiveAccounts = _hideInactiveAccounts.getValue();
         for (MachineIdentity.AccountInfo info : ident.accounts) {
             AccountName name = info.name;
-            if (!showInactiveAccounts && name.gameNames.isEmpty()) {
+            boolean isInactive = name.gameNames.isEmpty();
+            if (hideInactiveAccounts && isInactive) {
                 continue;
             }
+            Widget account = SlingUtils.linkToAccount(_ctx, name.accountName, name.accountName);
+            if (!isInactive) {
+                Widgets.setStyleNames(account, "Name");
+            }
+
             FlowPanel nameWidget;
             if (showGameNames) {
                 // account names in bold, followed by game names
-                Widget account = Widgets.setStyleNames(SlingUtils.linkToAccount(
-                    _ctx, name.accountName, name.accountName), "Name");
-                if (name.gameNames.size() == 0) {
+                if (isInactive) {
                     nameWidget = Widgets.newFlowPanel(account);
                 } else {
                     String gameNames = "";
@@ -133,9 +137,9 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
                 }
             } else {
                 // just account names
-                nameWidget = Widgets.newFlowPanel(
-                    SlingUtils.linkToAccount(_ctx, name.accountName, name.accountName));
+                nameWidget = Widgets.newFlowPanel(account);
             }
+
             if (info.paid) {
                 nameWidget.insert(Widgets.newInlineLabel("$", "Paid"), 0);
             }
@@ -253,7 +257,7 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
     protected SlingContext _ctx;
     protected List<MachineIdentity> _idents;
     protected HasValue<Boolean> _showGameNames;
-    protected HasValue<Boolean> _showInactiveAccounts;
+    protected HasValue<Boolean> _hideInactiveAccounts;
 
     protected static final String[] ACCOUNT_STYLES = {"Account"};
     protected static final String[] BANNED_ACCOUNT_STYLES = {"Account", "Banned"};
