@@ -61,10 +61,10 @@ public class SlingNav
             return new PageAddress(ID, new Arguments(Nav.toArg(Mode.POSTNOTE), accountName));
         }
 
-        public static PageAddress findRelated (int accountId)
+        public static PageAddress findRelated (int accountId, String accountName)
         {
             return new PageAddress(ID, new Arguments(Nav.toArg(Mode.RELATED),
-                Integer.toString(accountId)));
+                accountName, Integer.toString(accountId)));
         }
 
         public static PageAddress createAccount ()

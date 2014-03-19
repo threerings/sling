@@ -55,7 +55,7 @@ public class AccountPanel extends NamedRowSmartTable
 
         cell(row, 0).colSpan(4).widget(Widgets.newRow("LinkBar",
             SlingUtils.makeLink(_ctx, _msgs.relatedAccounts(),
-                Accounts.findRelated(_account.accountId)),
+                Accounts.findRelated(_account.accountId, _account.name.accountName)),
             SlingUtils.linkToSupportHistory(_ctx, _account.name),
             SlingUtils.makeLink(_ctx, _msgs.postNoteLink(),
                 Accounts.postNote(_account.name.accountName))));

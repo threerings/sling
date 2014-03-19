@@ -36,7 +36,8 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
     /**
      * Creates a new related accounts panel.
      */
-    public RelatedAccountsPanel (SlingContext ctx, int accountId, List<MachineIdentity> idents)
+    public RelatedAccountsPanel (SlingContext ctx, String accountName,
+        int accountId, List<MachineIdentity> idents)
     {
         _ctx = ctx;
         _idents = idents;
@@ -45,7 +46,7 @@ public class RelatedAccountsPanel extends NamedRowSmartTable
 
         int row = 0;
         cell(row, 0).styles("Title").colSpan(2).text(
-            _msgs.accountsRelatedToAccountId(String.valueOf(accountId)));
+            _msgs.accountsRelatedToAccount(accountName, String.valueOf(accountId)));
         row++;
 
         cell(row, 0).text("").colSpan(2).styles("Status");

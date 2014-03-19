@@ -51,6 +51,7 @@ public class AccountsSection<Ctx extends SlingContext>
         case POSTNOTE:
             return new PostNotePanel(ctx, shifter.next());
         case RELATED:
+            final String accountName = shifter.next();
             final int accountId = Integer.parseInt(shifter.next());
             final SimplePanel container = Widgets.newSimplePanel(null,
                 Widgets.newInlineLabel(_msgs.findingRelatedAccounts()));
@@ -70,7 +71,7 @@ public class AccountsSection<Ctx extends SlingContext>
                             container.setWidget(Widgets.newInlineLabel(
                                 _msgs.noRelatedAccountsFoundForAccountId(String.valueOf(accountId))));
                         } else {
-                            container.setWidget(new RelatedAccountsPanel(ctx, accountId, result));
+                            container.setWidget(new RelatedAccountsPanel(ctx, accountName, accountId, result));
                         }
                     }
                 });
