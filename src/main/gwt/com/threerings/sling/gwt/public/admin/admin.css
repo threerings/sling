@@ -194,6 +194,12 @@ table.uEventsTable {
   margin-top: 10px;
 }
 
+.uEventsTable .heart {
+  color: red;
+  font-size: 24;
+  text-align: center;
+}
+
 .uEventsTable td {
   border-top: 1px solid;
 }

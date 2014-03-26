@@ -85,6 +85,9 @@ public class EventsTable extends PagedTable<Event>
             cb.setName(String.valueOf(event.eventId));
             _checkboxen.add(cb);
             check = cb;
+        } else if (event.status.isOpen() && _ctx.ainfo.name.equals(event.owner)) {
+            check = new HTML("\u2764");
+            check.setStyleName("heart");
         } else {
             check = new HTML("");
         }
