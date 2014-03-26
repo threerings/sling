@@ -159,6 +159,7 @@ public class Event
         case NOTE:
             return "note";
         case PETITION:
+            return "petition";
         case COMPLAINT:
         default:
             return "default";

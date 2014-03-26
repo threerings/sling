@@ -235,16 +235,20 @@ table.uEventsTable {
   background: #66FF66;
 }
 
+.uEventsTable td.petition {
+  background: #B989B9;
+}
+
 .uEventsTable td.default {
   background: #FFAC30;
 }
 
 .uEventsTable td.unclaimed {
-  background: #FFCCCC;
+  background: #009933;
 }
 
 .uEventsTable td.claimed {
-  background: #99CCFF;
+  background: #FFFF00;
 }
 
 .uEventsTable td.closed {
