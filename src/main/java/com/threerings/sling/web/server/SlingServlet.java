@@ -841,6 +841,10 @@ public abstract class SlingServlet extends RemoteServiceServlet
             }
         }
 
+        if (!isReply) {
+            _slingRepo.updateEvent(event.eventId, Event.Status.OPEN, null);
+        }
+
         result.message = msgrec.toMessage(_userLogic.resolveNames(
             Collections.singleton(caller.username)));
         if (!caller.isSupport) {
