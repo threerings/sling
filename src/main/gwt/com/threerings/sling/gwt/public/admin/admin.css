@@ -253,6 +253,10 @@ table.uEventsTable {
   background: #009933;
 }
 
+.uEventsTable td.escalated {
+  background: #FF3333;
+}
+
 .uEventsTable td.claimed {
   background: #FFFF00;
 }

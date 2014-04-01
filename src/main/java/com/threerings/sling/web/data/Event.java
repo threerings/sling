@@ -143,6 +143,9 @@ public class Event
         case RESOLVED_CLOSED:
         case IGNORED_CLOSED:
             return "closed";
+        case ESCALATED_LEAD:
+        case ESCALATED_ADMIN:
+            return "escalated";
         default:
             return "unclaimed";
         }
