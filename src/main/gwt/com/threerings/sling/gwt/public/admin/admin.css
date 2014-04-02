@@ -265,6 +265,10 @@ table.uEventsTable {
   background: #CCCCFF;
 }
 
+.uEventsTable td.ignored {
+  background: #E6E6E6;
+}
+
 /* Account panel */
 table.uAccountPanel, table.uAccountPanel .LinkBar {
   font-size: 10pt;

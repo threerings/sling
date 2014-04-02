@@ -141,8 +141,9 @@ public class Event
             return "claimed";
         case PLAYER_CLOSED:
         case RESOLVED_CLOSED:
-        case IGNORED_CLOSED:
             return "closed";
+        case IGNORED_CLOSED:
+            return "ignored";
         case ESCALATED_LEAD:
         case ESCALATED_ADMIN:
             return "escalated";
