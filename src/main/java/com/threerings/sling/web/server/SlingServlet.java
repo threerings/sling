@@ -841,7 +841,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             }
         }
 
-        if (!isReply) {
+        if (isOwner && Event.Status.IN_PROGRESS.equals(event.status)) {
             _slingRepo.updateEvent(event.eventId, Event.Status.OPEN, null);
         }
 
