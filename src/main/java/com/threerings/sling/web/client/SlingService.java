@@ -40,15 +40,6 @@ public interface SlingService extends RemoteService
     public enum AuthUrl { GAME, BILLING, REDIRECT }
 
     /**
-     * Relevant information about the sling server.
-     */
-    public static class ServerInfo implements IsSerializable
-    {
-        /** The time zone offset, in milliseconds, of the server. */
-        public long timeZoneOffset;
-    }
-
-    /**
      * Information returned during the logon process.
      */
     public static class AuthInfo implements IsSerializable
@@ -59,7 +50,6 @@ public interface SlingService extends RemoteService
         public boolean isJrSupport;
         public boolean isAdmin;
         public boolean isMaintainer;
-        public ServerInfo serverInfo;
 
         public AuthInfo() {}
         public String getBillingUrl ()

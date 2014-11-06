@@ -1065,13 +1065,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
                 ainfo.setUrl(AuthUrl.BILLING, url);
             }
         }
-        ainfo.serverInfo = new ServerInfo();
-
-        // TODO: what do other threerings servers do about daylight savings? Among other things,
-        // depot stores time stamps with no time zone, so presumably the value we deserialize
-        // from the database changes when a DST boundary is crossed.
-        ainfo.serverInfo.timeZoneOffset =
-            TimeZone.getDefault().getOffset(System.currentTimeMillis());
 
         return ainfo;
     }
