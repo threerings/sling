@@ -104,5 +104,5 @@
       </plugin>
     </plugins>
   </build>
-  <version>1.4.14</version>
+  <version>1.5-SNAPSHOT</version>
 </project>
