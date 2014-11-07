@@ -1071,7 +1071,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         // depot stores time stamps with no time zone, so presumably the value we deserialize
         // from the database changes when a DST boundary is crossed.
         ainfo.serverInfo.timeZoneOffset =
-            TimeZone.getDefault().getOffset(System.currentTimeMillis());
+            TimeZone.getTimeZone("PST8PDT").getOffset(System.currentTimeMillis());
 
         return ainfo;
     }
