@@ -130,6 +130,7 @@ public class SlingContext
                     return;
                 }
                 ainfo = result;
+                ServerTime.setOffset(ainfo.serverInfo.timeZoneOffset);
                 callback.onSuccess(null);
             }
 
@@ -150,6 +151,7 @@ public class SlingContext
         svc.login(username, password, new AsyncCallback<SlingService.AuthInfo>() {
             public void onSuccess (SlingService.AuthInfo result) {
                 ainfo = result;
+                ServerTime.setOffset(ainfo.serverInfo.timeZoneOffset);
                 callback.onSuccess(null);
             }
 
