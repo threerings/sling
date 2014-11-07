@@ -478,7 +478,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         requireAuthedSupport();
 
-        Calendars.Builder cal = Calendars.at(now);
+        Calendars.Builder cal = Calendars.at(now).in(TimeZone.getTimeZone("PST8PDT"));
 
         // translate time units and make sure now is on a boundary
         int calUnit;

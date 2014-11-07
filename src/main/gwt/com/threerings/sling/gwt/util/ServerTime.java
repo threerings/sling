@@ -4,6 +4,7 @@
 package com.threerings.sling.gwt.util;
 
 import java.util.Date;
+import java.util.Locale;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.GWT;
@@ -21,6 +22,14 @@ import com.threerings.gwt.util.DateUtil;
  */
 public class ServerTime
 {
+    /**
+     * Creates a server time based on the server time.
+     */
+    public static ServerTime create (long time)
+    {
+        return new ServerTime(time, 0l);
+    }
+
     /**
      * Converts a universal time to a server time.
      */
@@ -212,7 +221,16 @@ public class ServerTime
      */
     public ServerTime addDays (int days)
     {
-        return addMillis(DAY_MILLIS * days);
+        ServerTime newServerTime = addMillis(DAY_MILLIS * days);
+
+        long dstOffset = TIME_ZONE.getDaylightAdjustment(new Date(getTime()))
+            - TIME_ZONE.getDaylightAdjustment(new Date(newServerTime.getTime()));
+
+        if (dstOffset == 0l) {
+            return newServerTime;
+        }
+
+        return newServerTime.addMillis(dstOffset * MINUTE_MILLIS);
     }
 
     /**
@@ -269,6 +287,14 @@ public class ServerTime
         return DateUtil.formatDateTime(new Date(time));
     }
 
+    /**
+     * Get the server time in milliseconds.
+     */
+    public long getTime ()
+    {
+        return (long)getNativeTime();
+    }
+
     private String internalFormat (DateTimeFormat fmt)
     {
         return fmt.format(new Date(getTime()), UTC);
@@ -284,11 +310,6 @@ public class ServerTime
     {
         _adjusted = newDate(utcMillis + serverTimeZoneOffset);
         _adjusted.equals(null);
-    }
-
-    private long getTime ()
-    {
-        return (long)getNativeTime();
     }
 
     private native double getNativeTime ()

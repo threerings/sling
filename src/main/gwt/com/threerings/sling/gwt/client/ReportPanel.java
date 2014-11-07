@@ -224,9 +224,13 @@ public abstract class ReportPanel<T> extends FlowPanel
                     _msgs.dayHdr() : _msgs.hourHdr())).styles("Header", "col0");
                 table.cell(0, 1).widget(Widgets.newLabel(_msgs.volumeHdr()))
                     .styles("Header", "col1");
+
+                ServerTime serverTime = ServerTime.create(result.begin);
                 for (int ii = 0; ii < result.eventCounts.length; ++ii) {
-                    long d = result.begin + unit.millis * ii;
-                    table.cell(ii + 1, 0).widget(Widgets.newLabel(ServerTime.from(d).format(fmt)))
+                    ServerTime currentTime = (unit == TimeUnit.DAY) ?
+                        serverTime.addDays(ii) : serverTime.addHours(ii);
+                    Date currentDate = new Date(currentTime.getTime());
+                    table.cell(ii + 1, 0).widget(Widgets.newLabel(fmt.format(currentDate)))
                         .styles("col0");
                     table.cell(ii + 1, 1).widget(Widgets.newLabel(String.valueOf(
                         result.eventCounts[ii]))).styles("col1");
