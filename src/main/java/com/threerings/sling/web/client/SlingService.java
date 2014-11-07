@@ -59,7 +59,6 @@ public interface SlingService extends RemoteService
         public boolean isJrSupport;
         public boolean isAdmin;
         public boolean isMaintainer;
-        public ServerInfo serverInfo;
 
         public AuthInfo() {}
         public String getBillingUrl ()

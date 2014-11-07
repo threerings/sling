@@ -6,8 +6,11 @@ package com.threerings.sling.gwt.util;
 import java.util.Date;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
+import com.google.gwt.i18n.client.TimeZoneInfo;
+import com.google.gwt.i18n.client.constants.TimeZoneConstants;
 
 import com.threerings.gwt.util.Console;
 import com.threerings.gwt.util.DateUtil;
@@ -23,7 +26,7 @@ public class ServerTime
      */
     public static ServerTime from (long time)
     {
-        return new ServerTime(time, _serverTimeZoneOffset);
+        return new ServerTime(time, TIME_ZONE.getOffset(new Date(time)) * -MINUTE_MILLIS);
     }
 
     /**
@@ -62,16 +65,6 @@ public class ServerTime
 
         // now we should have a UTC time
         return dbgLog("ServerTime.parse", new ServerTime(time, 0), "input", input);
-    }
-
-    /**
-     * Sets the global time zone offset value used for all subsequently created ServerTime
-     * instances.
-     */
-    public static void setOffset (long offset)
-    {
-        Console.log("ServerTime.setServerTimeZoneOffset", "value", offset);
-        _serverTimeZoneOffset = offset;
     }
 
     /**
@@ -164,7 +157,8 @@ public class ServerTime
      */
     public long toUniversal ()
     {
-        return getTime() - _serverTimeZoneOffset;
+        long time = getTime();
+        return time + TIME_ZONE.getOffset(new Date(time)) * MINUTE_MILLIS;
     }
 
     /**
@@ -337,5 +331,7 @@ public class ServerTime
     private static final TimeZone UTC = TimeZone.createTimeZone(0);
     private static final DateTimeFormat DATE = DateTimeFormat.getFormat("MMM dd yyyy");
     private static final DateTimeFormat TIME = DateTimeFormat.getFormat("MMM dd yyyy h:mmaa");
-    private static long _serverTimeZoneOffset = -7 * HOUR_MILLIS;
+    private static final TimeZone TIME_ZONE = TimeZone.createTimeZone(
+        TimeZoneInfo.buildTimeZoneData(
+            ((TimeZoneConstants)GWT.create(TimeZoneConstants.class)).americaLosAngeles()));
 }
