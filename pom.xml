@@ -8,13 +8,13 @@
   <name>Sling</name>
 
   <scm>
-    <developerConnection>scm:git:git://src.earth.threerings.net/sling.git</developerConnection>
+    <developerConnection>scm:git:git://src.greyhavens.co/sling.git</developerConnection>
   </scm>
 
   <repositories>
     <repository>
       <id>ooo.maven</id>
-      <url>http://build.earth.threerings.net/maven-repository</url>
+      <url>http://build.greyhavens.co/maven-repository</url>
       <snapshots>
         <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
