@@ -3,6 +3,9 @@
 
 package com.threerings.sling.gwt.util;
 
+import java.net.URLEncoder;
+import java.net.URLDecoder;
+
 /**
  * Encapsulates the address of a web page in a sling application.
  */
@@ -89,7 +92,7 @@ public class PageAddress
             case '.': fragment.append(".(dot)"); break;
             }
         }
-        return fragment.toString();
+        return urlEncode(fragment.toString());
     }
 
     protected static String unescape (String fragment)
@@ -114,7 +117,31 @@ public class PageAddress
             }
             arg.append(esc);
         }
-        return arg.toString();
+        return urlDecode(arg.toString());
+    }
+
+    /**
+     * Url encode the fragment.
+     */
+    protected static String urlEncode (String s)
+    {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (UnsupportedEncodingException uee) {
+            throw new AssertionError(uee);
+        }
+    }
+
+    /**
+     * Url decode the fragment.
+     */
+    protected static String urlDecode (String s)
+    {
+        try {
+            return URLDecoder.decode(s, "UTF-8");
+        } catch (UnsupportedEncodingException uee) {
+            throw new AssertionError(uee);
+        }
     }
 
     protected static int wrap (int pos, int len)
