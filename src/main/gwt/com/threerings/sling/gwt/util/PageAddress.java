@@ -3,6 +3,8 @@
 
 package com.threerings.sling.gwt.util;
 
+import java.io.UnsupportedEncodingException;
+
 import java.net.URLEncoder;
 import java.net.URLDecoder;
 
