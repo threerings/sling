@@ -3,10 +3,7 @@
 
 package com.threerings.sling.gwt.util;
 
-import java.io.UnsupportedEncodingException;
-
-import java.net.URLEncoder;
-import java.net.URLDecoder;
+import com.google.gwt.http.client.URL;
 
 /**
  * Encapsulates the address of a web page in a sling application.
@@ -94,11 +91,13 @@ public class PageAddress
             case '.': fragment.append(".(dot)"); break;
             }
         }
-        return urlEncode(fragment.toString());
+        return URL.encode(fragment.toString());
     }
 
     protected static String unescape (String fragment)
     {
+        fragment = URL.decode(fragment);
+
         StringBuilder arg = new StringBuilder();
         for (int pos = 0, len = fragment.length(), gremlin; ; pos = gremlin + 6) {
             gremlin = wrap(fragment.indexOf('.', pos), len);
@@ -119,31 +118,7 @@ public class PageAddress
             }
             arg.append(esc);
         }
-        return urlDecode(arg.toString());
-    }
-
-    /**
-     * Url encode the fragment.
-     */
-    protected static String urlEncode (String s)
-    {
-        try {
-            return URLEncoder.encode(s, "UTF-8");
-        } catch (UnsupportedEncodingException uee) {
-            throw new AssertionError(uee);
-        }
-    }
-
-    /**
-     * Url decode the fragment.
-     */
-    protected static String urlDecode (String s)
-    {
-        try {
-            return URLDecoder.decode(s, "UTF-8");
-        } catch (UnsupportedEncodingException uee) {
-            throw new AssertionError(uee);
-        }
+        return arg.toString();
     }
 
     protected static int wrap (int pos, int len)
