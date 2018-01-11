@@ -3,6 +3,8 @@
 
 package com.threerings.sling.gwt.client;
 
+import com.google.common.base.Function;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -36,13 +38,11 @@ public class AdminBar extends VerticalPanel
         setVerticalAlignment(ALIGN_MIDDLE);
         setHorizontalAlignment(ALIGN_CENTER);
 
-        final ItemListBox<Accounts.SearchBy> accountSearchType =
-            ItemListBox.<Accounts.SearchBy>builder()
-            .add(Accounts.SearchBy.ACCOUNTNAME, _msgs.accountName())
-            .add(Accounts.SearchBy.USERNAME, _msgs.name())
-            .add(Accounts.SearchBy.EMAIL, _msgs.emailItem())
-            .add(Accounts.SearchBy.GAMENAME, _msgs.gameName())
-            .build();
+        _accountSearchType = new ItemListBox<Function<String, PageAddress>>();
+        addSearchType(_msgs.accountName(), Accounts.SearchBy.ACCOUNTNAME);
+        addSearchType(_msgs.name(), Accounts.SearchBy.USERNAME);
+        addSearchType(_msgs.emailItem(), Accounts.SearchBy.EMAIL);
+        addSearchType(_msgs.gameName(), Accounts.SearchBy.GAMENAME);
 
         final TextBox accountQuery = Widgets.newTextBox("", 512, 24);
         final TextBox eventIdQuery = Widgets.newTextBox("", 7, 5);
@@ -54,7 +54,7 @@ public class AdminBar extends VerticalPanel
 
         row.add(Widgets.newFlowPanel("Accounts",
             Widgets.newLabel(_msgs.searchLabel()),
-            accountSearchType, accountQuery));
+            _accountSearchType, accountQuery));
 
         row.add(Widgets.newFlowPanel("Events",
             Widgets.newLabel("\u2022", "SpacerLabel"),
@@ -87,7 +87,7 @@ public class AdminBar extends VerticalPanel
 
         ClickHandler accountSearch = new ClickHandler() {
             @Override public void onClick (ClickEvent event) {
-                nav(Accounts.find(accountSearchType.getSelectedItem(), accountQuery.getText()));
+                nav(_accountSearchType.getSelectedItem().apply(accountQuery.getText()));
             }
         };
 
@@ -110,12 +110,23 @@ public class AdminBar extends VerticalPanel
         });
     }
 
+    /**
+     * Add a new kind of account search to this admin bar.
+     */
+    public void addSearchType (String label, Function<String, PageAddress> queryizer)
+    {
+        _accountSearchType.addItem(queryizer, label);
+    }
+
     protected void nav (PageAddress addr)
     {
         _app.getContext().navigate(addr);
     }
 
     protected SlingApp<?> _app;
+
+    /** The box that chooses the kind of search. */
+    protected ItemListBox<Function<String, PageAddress>> _accountSearchType;
 
     protected static final ClientMessages _msgs = GWT.create(ClientMessages.class);
 }

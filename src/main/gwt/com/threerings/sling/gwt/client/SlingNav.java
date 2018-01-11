@@ -5,6 +5,8 @@ package com.threerings.sling.gwt.client;
 
 import java.util.Set;
 
+import com.google.common.base.Function;
+
 import com.threerings.sling.gwt.util.Arguments;
 import com.threerings.sling.gwt.util.Nav;
 import com.threerings.sling.gwt.util.PageAddress;
@@ -37,8 +39,16 @@ public class SlingNav
             SEARCH, POSTNOTE, RELATED, CREATE;
         }
 
-        public static enum SearchBy {
+        public static enum SearchBy
+            implements Function<String, PageAddress>
+        {
             USERNAME, ACCOUNTNAME, EMAIL, GAMENAME, ID;
+
+            // from Function
+            public PageAddress apply (String query)
+            {
+                return find(this, query);
+            }
         }
 
         public static PageAddress find (SearchBy by, String query)
