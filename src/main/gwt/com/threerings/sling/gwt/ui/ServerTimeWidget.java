@@ -23,11 +23,6 @@ import com.threerings.sling.gwt.util.ServerTime;
  * dates within the current year, MM/DD/YY dates within our century of 2000 and full MM/DD/YYYY
  * dates. Time is entered using ##(:##)?[a|p]m? where ## is 1 to 12 and 00 to 60, or ##(:##)?
  * where ## is 0 to 23 and ## is 00 to 60.
- *
- * <p>NOTE on time zones: The public API for this class uses UniversalTime objects, since those
- * are most often used for communicating with the server. Internally, the universal times are
- * converted to and from {@link ServerTime} instances in order to display and parse the date and
- * time values.</p>
  */
 public class ServerTimeWidget extends Composite
 {
