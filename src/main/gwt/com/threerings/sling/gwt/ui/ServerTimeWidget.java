@@ -66,19 +66,10 @@ public class ServerTimeWidget extends Composite
     public void setTime (long utime)
     {
         ServerTime time = ServerTime.from(utime);
-        ServerTime now = ServerTime.now();
-        int fmt = 0;
-        if (time.getYear() == now.getYear()) {
-            fmt = 2;
-        } else if (time.getYear() >= 2000) {
-            fmt = 1;
-        }
-
-        _date.setText(time.format(_fmts[fmt]));
+        _date.setText(time.format(_fmts[0]));
 
         if (_time != null) {
-            fmt = time.getMinutes() == 0 ? 0 : 1;
-            _time.setText(time.format(_tfmts[fmt]));
+            _time.setText(time.format(_tfmts[0]));
 
             if (!hasTime() && (time.getHours() != 0 || time.getMinutes() != 0)) {
                 toggleTime();
@@ -171,16 +162,15 @@ public class ServerTimeWidget extends Composite
     protected Widget _timeToggle;
 
     protected static DateTimeFormat _fmts[] = {
-        DateTimeFormat.getFormat("MM/dd/yyyy"),
-        DateTimeFormat.getFormat("MM/dd/yy"),
+        DateTimeFormat.getFormat("yyyy-MM-dd"),
         DateTimeFormat.getFormat("MM/dd")
     };
 
     protected static DateTimeFormat _tfmts[] = {
-        DateTimeFormat.getFormat("ha"),
+        DateTimeFormat.getFormat("HH:mm"),
         DateTimeFormat.getFormat("h:mma"),
-        DateTimeFormat.getFormat("HH"),
-        DateTimeFormat.getFormat("HH:mm")
+        DateTimeFormat.getFormat("HH")
+        DateTimeFormat.getFormat("ha"),
     };
 
     protected static final UiMessages _msgs = GWT.create(UiMessages.class);
