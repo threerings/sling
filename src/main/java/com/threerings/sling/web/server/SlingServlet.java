@@ -1375,8 +1375,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
      * are written frequently and read rarely. */
     protected ConcurrentMap<String, Long> _activityWriteCache = Maps.newConcurrentMap();
 
-    protected static final DateFormat DBG_FMT =
-        DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
+//    protected static final DateFormat DBG_FMT =
+//        DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
 
     /** Expire sessions after five days. */
     protected static final int SESSION_EXPIRY_DAYS = 5;
