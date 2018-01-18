@@ -169,8 +169,8 @@ public class ServerTimeWidget extends Composite
     protected static DateTimeFormat _tfmts[] = {
         DateTimeFormat.getFormat("HH:mm"),
         DateTimeFormat.getFormat("h:mma"),
-        DateTimeFormat.getFormat("HH")
-        DateTimeFormat.getFormat("ha"),
+        DateTimeFormat.getFormat("HH"),
+        DateTimeFormat.getFormat("ha")
     };
 
     protected static final UiMessages _msgs = GWT.create(UiMessages.class);
