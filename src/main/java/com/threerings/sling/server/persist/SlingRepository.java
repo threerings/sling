@@ -257,7 +257,19 @@ public class SlingRepository extends DepotRepository
     public Collection<MessageRecord> loadMessages (Collection<Integer> eventIds)
     {
         return findAll(MessageRecord.class, new Where(MessageRecord.EVENT_ID.in(eventIds)),
-                       OrderBy.descending(MessageRecord.ENTERED));
+                OrderBy.descending(MessageRecord.ENTERED));
+    }
+
+    /**
+     * Loads all messages iwht the specified access for the supplied set of events.
+     */
+    public Collection<MessageRecord> loadMessages (
+            Message.Access access, Collection<Integer> eventIds)
+    {
+        return findAll(MessageRecord.class,
+                new Where(Ops.and(
+                        MessageRecord.EVENT_ID.in(eventIds), MessageRecord.ACCESS.eq(access))),
+                OrderBy.descending(MessageRecord.ENTERED));
     }
 
     /**

@@ -343,15 +343,12 @@ public abstract class SlingServlet extends RemoteServiceServlet
 
         // next load up all messages for those petitions
         if (petitions.size() > 0) {
-            Collection<MessageRecord> msgrecs = _slingRepo.loadMessages(petitions.keySet());
+            Collection<MessageRecord> msgrecs = _slingRepo.loadMessages(
+                    Message.Access.NORMAL, petitions.keySet());
             Map<String, AccountName> names = resolveNames(msgrecs);
 
             // now convert the message records into
             for (MessageRecord msgrec : msgrecs) {
-                // support-only messages are not visible in petition view
-                if (msgrec.access == Message.Access.SUPPORT) {
-                    continue;
-                }
                 UserPetition petition = petitions.get(msgrec.eventId);
                 Message message = msgrec.toMessage(names);
                 if (message.author != null) {
