@@ -39,6 +39,7 @@ import com.samskivert.depot.util.Tuple3;
 import com.threerings.sling.web.data.Event;
 import com.threerings.sling.web.data.EventFilter;
 import com.threerings.sling.web.data.EventSearch;
+import com.threerings.sling.web.data.Message;
 import com.threerings.sling.web.data.TimeRange;
 
 /**
