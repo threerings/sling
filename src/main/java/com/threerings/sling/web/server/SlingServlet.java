@@ -32,6 +32,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -364,7 +365,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         List<UserPetition> result = Lists.newArrayList(petitions.values());
         Collections.sort(result, new Comparator<UserPetition>() {
             public int compare (UserPetition one, UserPetition two) {
-                return Longs.compare(two.entered, one.entered);
+                return Longs.compare(two.entered, one.entered); // reversed
             }
         });
         return result;
@@ -1357,7 +1358,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             List<Category> faqs = Lists.newArrayList(cats.values());
             Collections.sort(faqs, new Comparator<Category>() {
                 public int compare (Category one, Category two) {
-                    return two.categoryId - one.categoryId;
+                    return Ints.compare(two.categoryId, one.categoryId); // reversed
                 }
             });
 
