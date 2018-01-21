@@ -359,7 +359,7 @@ public interface SlingService extends RemoteService
     /**
      * Loads up all messages for the supplied event. Admin only.
      */
-    public Message[] loadMessages (int eventId)
+    public List<Message> loadMessages (int eventId)
         throws SlingException;
 
     /**
@@ -412,7 +412,7 @@ public interface SlingService extends RemoteService
     /**
      * Returns a list of all FAQ Category objects.
      */
-    public Category[] getFAQs ()
+    public List<Category> getFAQs ()
         throws SlingException;
 
     /**

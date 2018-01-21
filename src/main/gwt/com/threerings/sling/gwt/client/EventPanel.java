@@ -3,6 +3,8 @@
 
 package com.threerings.sling.gwt.client;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -288,11 +290,11 @@ public class EventPanel extends FlowPanel
         });
 
         // load up our messages
-        _ctx.svc.loadMessages(event.eventId, new AsyncCallback<Message[]>() {
-            public void onSuccess (Message[] messages) {
+        _ctx.svc.loadMessages(event.eventId, new AsyncCallback<List<Message>>() {
+            public void onSuccess (List<Message> messages) {
                 _messages.clear();
-                for (int ii = messages.length - 1; ii >= 0; ii--) {
-                    addMessage(messages[ii]);
+                for (int ii = messages.size() - 1; ii >= 0; ii--) {
+                    addMessage(messages.get(ii));
                 }
             }
             public void onFailure (Throwable cause) {

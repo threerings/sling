@@ -3,6 +3,8 @@
 
 package com.threerings.sling.gwt.client;
 
+import java.util.List;
+
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -34,7 +36,7 @@ public class FAQPanels extends FlowPanel
     /**
      * Creates a panel to view the given FAQs.
      */
-    public static FlowPanel view (SlingContext ctx, Category[] categories)
+    public static FlowPanel view (SlingContext ctx, List<Category> categories)
     {
         FlowPanel panel = Widgets.newFlowPanel("uFaqPanel");
         if (ctx.isSupport()) {
@@ -62,7 +64,7 @@ public class FAQPanels extends FlowPanel
     /**
      * Creates a panel to edit the given FAQs.
      */
-    public static FlowPanel edit (SlingContext ctx, Category[] categories)
+    public static FlowPanel edit (SlingContext ctx, List<Category> categories)
     {
         FlowPanel panel = Widgets.newFlowPanel("uFaqPanel",
             new ParaPanel(SlingUtils.makeLink(ctx, _msgs.view(), FAQ.view()), "ViewLink"),
@@ -86,7 +88,7 @@ public class FAQPanels extends FlowPanel
      * Creates a panel to edit the question with the given id from the given FAQs. If a question
      * of the given id is not found, the panel is configured to add a new question.
      */
-    public static Widget editQuestion (final SlingContext ctx, Category[] categories,
+    public static Widget editQuestion (final SlingContext ctx, List<Category> categories,
         int questionId)
     {
         final NamedRowSmartTable table = new NamedRowSmartTable("uFaqPanel", 0, 5);
@@ -204,7 +206,7 @@ public class FAQPanels extends FlowPanel
         return table;
     }
 
-    protected static Question findOrCreateQuestion (Category[] categories, int questionId)
+    protected static Question findOrCreateQuestion (List<Category> categories, int questionId)
     {
         for (Category cat : categories) {
             for (Question q : cat.questions) {
@@ -214,7 +216,7 @@ public class FAQPanels extends FlowPanel
             }
         }
         Question q = new Question();
-        q.categoryId = categories.length > 0 ? categories[0].categoryId : 0;
+        q.categoryId = categories.isEmpty() ? 0 : categories.get(0).categoryId;
         return q;
     }
 

@@ -178,7 +178,7 @@ public interface SlingServiceAsync
     /**
      * The asynchronous version of {@link SlingService#loadMessages}.
      */
-    public void loadMessages (int eventId, AsyncCallback<Message[]> callback);
+    public void loadMessages (int eventId, AsyncCallback<List<Message>> callback);
 
     /**
      * The asynchronous version of {@link SlingService#updateEvent}.
@@ -225,7 +225,7 @@ public interface SlingServiceAsync
     /**
      * The asynchronous version of {@link SlingService#getFAQs}.
      */
-    public void getFAQs (AsyncCallback<Category[]> callback);
+    public void getFAQs (AsyncCallback<List<Category>> callback);
 
     /**
      * The asynchronous version of {@link SlingService#storeCategory}.

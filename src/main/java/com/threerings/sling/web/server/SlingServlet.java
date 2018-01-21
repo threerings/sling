@@ -579,20 +579,18 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     // from SlingService
-    @Override public Message[] loadMessages (int eventId)
+    @Override public List<Message> loadMessages (int eventId)
         throws SlingException
     {
         requireAuthedSupport();
 
-        ArrayList<Integer> ids = new ArrayList<Integer>();
-        ids.add(eventId);
-        Collection<MessageRecord> msgrecs = _slingRepo.loadMessages(ids);
+        Collection<MessageRecord> msgrecs = _slingRepo.loadMessages(Collections.singleton(eventId));
         Map<String, AccountName> names = resolveNames(msgrecs);
         ArrayList<Message> msgs = new ArrayList<Message>();
         for (MessageRecord msgrec : msgrecs) {
             msgs.add(msgrec.toMessage(names));
         }
-        return msgs.toArray(new Message[msgs.size()]);
+        return msgs;
     }
 
     // from SlingService
@@ -901,7 +899,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     // from SlingService
-    @Override public Category[] getFAQs ()
+    @Override public List<Category> getFAQs ()
         throws SlingException
     {
         return _faqs.get(0);
@@ -1334,9 +1332,9 @@ public abstract class SlingServlet extends RemoteServiceServlet
     };
 
     /** A cached copy of the FAQs. */
-    protected SimpleCache<Integer, Category[]> _faqs =
-            new SimpleCache<Integer, Category[]>(FAQ_REFRESH_INTERVAL) {
-        @Override protected Category[] compute (Integer key) throws SlingException {
+    protected SimpleCache<Integer, List<Category>> _faqs =
+            new SimpleCache<Integer, List<Category>>(FAQ_REFRESH_INTERVAL) {
+        @Override protected List<Category> compute (Integer key) throws SlingException {
             Preconditions.checkArgument(key == 0);
 
             // first load our categories
@@ -1356,8 +1354,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
             }
 
             // finally store them as an array of categories
-            Category[] faqs = cats.values().toArray(new Category[cats.size()]);
-            Arrays.sort(faqs, new Comparator<Category>() {
+            List<Category> faqs = Lists.newArrayList(cats.values());
+            Collections.sort(faqs, new Comparator<Category>() {
                 public int compare (Category one, Category two) {
                     return two.categoryId - one.categoryId;
                 }

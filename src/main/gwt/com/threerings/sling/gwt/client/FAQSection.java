@@ -4,6 +4,7 @@
 package com.threerings.sling.gwt.client;
 
 import java.util.Iterator;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
@@ -43,7 +44,7 @@ public class FAQSection<Ctx extends SlingContext>
         case VIEW:
             return new FAQLoadingPanel(ctx) {
                 @Override
-                protected Widget finish (Category[] result)
+                protected Widget finish (List<Category> result)
                 {
                     return FAQPanels.view(_ctx, result);
                 }
@@ -52,7 +53,7 @@ public class FAQSection<Ctx extends SlingContext>
             AuthLevel.ADMIN.require(ctx);
             return new FAQLoadingPanel(ctx) {
                 @Override
-                protected Widget finish (Category[] result)
+                protected Widget finish (List<Category> result)
                 {
                     return FAQPanels.edit(_ctx, result);
                 }
@@ -62,7 +63,7 @@ public class FAQSection<Ctx extends SlingContext>
             final int questionId = shifter.hasNext() ? Integer.valueOf(shifter.next()) : 0;
             return new FAQLoadingPanel(ctx) {
                 @Override
-                protected Widget finish (Category[] result)
+                protected Widget finish (List<Category> result)
                 {
                     return FAQPanels.editQuestion(_ctx, result, questionId);
                 }
@@ -71,7 +72,7 @@ public class FAQSection<Ctx extends SlingContext>
         return null;
     }
 
-    protected abstract class FAQLoadingPanel extends LoadingPanel<Category[]>
+    protected abstract class FAQLoadingPanel extends LoadingPanel<List<Category>>
     {
         public FAQLoadingPanel (SlingContext ctx)
         {
