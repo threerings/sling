@@ -17,7 +17,7 @@ public class Event
     /**
      * Types of events. Caution: these are referenced by name in the database.
      */
-    public enum Type implements IsSerializable
+    public enum Type
     {
         SUPPORT_ACTION, NOTE, PETITION, COMPLAINT
     }
@@ -27,7 +27,7 @@ public class Event
      * client.
      * <p>NOTE: inheritance from ByteEnum is legacy, avoiding a complex schema change.</p>
      */
-    public enum Status implements ByteEnum, IsSerializable
+    public enum Status implements ByteEnum
     {
         OPEN(1), IN_PROGRESS(2), PLAYER_CLOSED(3), RESOLVED_CLOSED(4), IGNORED_CLOSED(5),
         ESCALATED_LEAD(6), ESCALATED_ADMIN(7);

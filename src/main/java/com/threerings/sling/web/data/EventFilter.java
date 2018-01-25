@@ -15,7 +15,7 @@ public class EventFilter
     implements IsSerializable
 {
     /** Types of filter. */
-    public enum Type implements IsSerializable
+    public enum Type
     {
         TYPE_IS, TYPE_IS_IN, STATUS_IS, HAS_NOTE, CREATED_BETWEEN, UPDATED_BETWEEN, OWNER_IS,
         OWNER_ID_IS, GAME_NAME_IS, ACCOUNT_NAME_IS, SUBJECT_MATCHES, CHAT_HISTORY_MATCHES,

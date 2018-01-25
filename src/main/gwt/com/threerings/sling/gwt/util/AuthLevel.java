@@ -3,12 +3,10 @@
 
 package com.threerings.sling.gwt.util;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * The levels of authorization a user of a sling application may have.
  */
-public enum AuthLevel implements IsSerializable {
+public enum AuthLevel {
     /** Not logged in. */
     NONE,
 
