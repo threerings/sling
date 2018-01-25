@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class Message
     implements IsSerializable
 {
-    public enum Access
+    public enum Access implements IsSerializable
     {
         NORMAL, SUPPORT
     };

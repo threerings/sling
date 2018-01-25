@@ -15,7 +15,7 @@ public class EventSearch
     implements IsSerializable
 {
     /** Ways to sort the results. */
-    public enum Sort
+    public enum Sort implements IsSerializable
     {
         CREATION
     }

@@ -12,7 +12,7 @@ public class Account
     implements IsSerializable
 {
     /** Flags on this account, mostly translated from OOOUser flags and tokens. */
-    public enum Flag
+    public enum Flag implements IsSerializable
     {
         HAS_BOUGHT_COINS, HAS_BOUGHT_TIME, FAMILY_SUBSCRIBER, ADMIN, MAINTAINER,
         INSIDER, TESTER, SUPPORT, JR_SUPPORT, BIG_SPENDER, BANNED, DEADBEAT;
@@ -25,7 +25,7 @@ public class Account
     }
 
     /** State values for billing account (from OOOUser). */
-    public enum BillingStatus
+    public enum BillingStatus implements IsSerializable
     {
         TRIAL, SUBSCRIBER, FAILURE, EX_SUBSCRIBER, BANNED
     }

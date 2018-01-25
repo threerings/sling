@@ -34,10 +34,10 @@ import com.threerings.sling.web.data.UserPetition;
 public interface SlingService extends RemoteService
 {
     /** Query types for {@link #loadEvents}. */
-    public enum Events { OPEN, MY, ALL, ACCOUNT }
+    public enum Events implements IsSerializable { OPEN, MY, ALL, ACCOUNT }
 
     /** The kinds of urls we may want to sent back with the AuthInfo. */
-    public enum AuthUrl { GAME, BILLING, REDIRECT }
+    public enum AuthUrl implements IsSerializable { GAME, BILLING, REDIRECT }
 
     /**
      * Relevant information about the sling server.
@@ -138,7 +138,7 @@ public interface SlingService extends RemoteService
         public int qualified;
     }
 
-    public enum TimeUnit
+    public enum TimeUnit implements IsSerializable
     {
         /** A one hour span. */
         HOUR(60 * 60 * 1000L),
