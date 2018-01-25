@@ -13,6 +13,7 @@ import com.threerings.gwt.util.PagedRequest;
 import com.threerings.gwt.util.PagedResult;
 import com.threerings.sling.web.client.SlingService.AssignEventResult;
 import com.threerings.sling.web.client.SlingService.AuthInfo;
+import com.threerings.sling.web.client.SlingService.AuthUrl;
 import com.threerings.sling.web.client.SlingService.AverageEventVolumeByHour;
 import com.threerings.sling.web.client.SlingService.EventResponses;
 import com.threerings.sling.web.client.SlingService.EventVolume;
@@ -254,4 +255,9 @@ public interface SlingServiceAsync
      */
     public void updateFlags (String accountName, int setFlags, int clearFlags,
             AsyncCallback<Integer> callback);
+
+    /**
+     * The asynchronous version of {@link SlingService#updateFlags}.
+     */
+    public void dummy1 (AsyncCallback<AuthUrl> callback);
 }

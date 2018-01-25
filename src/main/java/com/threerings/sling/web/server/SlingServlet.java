@@ -937,6 +937,14 @@ public abstract class SlingServlet extends RemoteServiceServlet
         }
     }
 
+    // from SlingService
+    @Override public AuthUrl dummy1 ()
+        throws SlingException
+    {
+        requireAuthedSupport();
+        return AuthUrl.BILLING;
+    }
+
     /**
      * Returns the name of the session cookie set when a user logs in and clear when they log out.
      * The cookie value is a session id value from the user db sessions table. By default, a sling
