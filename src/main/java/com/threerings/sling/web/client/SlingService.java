@@ -452,5 +452,6 @@ public interface SlingService extends RemoteService
     /**
      * Hack around a GWT bug where enums in Maps throw a serialization exception, but only
      * sometimes. This enum is used as Map keys inside AuthInfo. */
-    public AuthUrl dummy1 ();
+    public AuthUrl dummy1 ()
+        throws SlingException;
 }
