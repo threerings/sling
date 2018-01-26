@@ -232,8 +232,18 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     // from SlingService
-    @Override public void updateBanned (int accountId, boolean banned, String reason,
-                              boolean untaintIdents)
+    @Override public void updateBanned (
+            int accountId, boolean banned, String reason, boolean untaintIdents)
+        throws SlingException
+    {
+        updateBanned(accountId, banned, reason, untaintIdents, null);
+    }
+
+    /**
+     * Interal version of updateBanned for adding a link.
+     */
+    protected void updateBanned (
+            int accountId, boolean banned, String reason, boolean untaintIdents, String link)
         throws SlingException
     {
         Caller caller = requireAuthedSupport();
@@ -244,11 +254,11 @@ public abstract class SlingServlet extends RemoteServiceServlet
             _actionHandler.ban(account.name.accountName);
             _actionHandler.warn(account.name.accountName, reason);
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, account.name.accountName,
-                _msgs.get("m.banned", reason));
+                _msgs.get("m.banned", reason), null, link);
         } else {
             _actionHandler.warn(account.name.accountName, null);
             recordEvent(Event.Type.SUPPORT_ACTION, caller.username, account.name.accountName,
-                _msgs.get("m.unbanned"));
+                _msgs.get("m.unbanned"), null, link);
         }
         updateRelatedAccounts(account, banned);
     }
@@ -1168,14 +1178,23 @@ public abstract class SlingServlet extends RemoteServiceServlet
         return evrec.eventId;
     }
 
-    protected int recordEvent (Event.Type type, String source, String target, String subject)
+    protected int recordEvent (
+            Event.Type type, String source, String target, String subject)
         throws SlingException
     {
-        return recordEvent(type, source, target, subject, null);
+        return recordEvent(type, source, target, subject, null, null);
     }
 
-    protected int recordEvent (Event.Type type, String source, String target, String subject,
-        String text)
+    protected int recordEvent (
+            Event.Type type, String source, String target, String subject, String text)
+        throws SlingException
+    {
+        return recordEvent(type, source, target, subject, text, null);
+    }
+
+    protected int recordEvent (
+            Event.Type type, String source, String target, String subject, String chatHistory,
+            String link)
         throws SlingException
     {
         // create a new support record for this petition
@@ -1185,7 +1204,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
         evrec.target = target;
         evrec.subject = subject;
         evrec.status = Event.Status.RESOLVED_CLOSED;
-        evrec.chatHistory = (text == null ? "" : text);
+        evrec.chatHistory = (chatHistory == null ? "" : chatHistory);
+        evrec.link = link;
         fillSessionInfo(evrec);
 
         // add the event record
