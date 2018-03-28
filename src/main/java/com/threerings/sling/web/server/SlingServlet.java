@@ -848,7 +848,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             }
         }
 
-        if (isOwner && (Event.Status.IN_PROGRESS.byteValue == event.status)) {
+        if (isOwner && (Event.Status.IN_PROGRESS == event.getStatus())) {
             _slingRepo.updateEvent(event.eventId, Event.Status.OPEN, null);
         }
 
@@ -1160,7 +1160,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         evrec.source = source;
         evrec.sourceHandle = handle;
         evrec.subject = petition.subject;
-        evrec.status = Event.Status.OPEN.byteValue;
+        evrec.setStatus(Event.Status.OPEN);
         evrec.chatHistory = "";
         fillSessionInfo(evrec);
 
@@ -1204,7 +1204,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         evrec.source = source;
         evrec.target = target;
         evrec.subject = subject;
-        evrec.status = Event.Status.RESOLVED_CLOSED.byteValue;
+        evrec.setStatus(Event.Status.RESOLVED_CLOSED);
         evrec.chatHistory = (chatHistory == null ? "" : chatHistory);
         evrec.link = link;
         fillSessionInfo(evrec);

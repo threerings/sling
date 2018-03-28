@@ -421,7 +421,7 @@ public class SlingRepository extends DepotRepository
         EventRecord event = new EventRecord();
         event.source = username;
         event.chatHistory = "";
-        event.status = Event.Status.RESOLVED_CLOSED.byteValue;
+        event.setStatus(Event.Status.RESOLVED_CLOSED);
         event.subject = "AUTO-BAN: " + reason;
         event.type = Event.Type.SUPPORT_ACTION;
         insertEvent(event);

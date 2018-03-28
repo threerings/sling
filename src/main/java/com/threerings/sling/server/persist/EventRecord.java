@@ -157,6 +157,24 @@ public class EventRecord extends PersistentRecord
         BYTE_TO_STATUS = builder.build();
     }
 
+    /**
+     * A nice setter, so that if we convert away from storing the byteValue in the future,
+     * we can hopefully change less code downstream.
+     */
+    public void setStatus (Event.Status status)
+    {
+        this.status = status.byteValue;
+    }
+
+    /**
+     * Get the status of this record.
+     * @See setStatus
+     */
+    public Event.Status getStatus ()
+    {
+        return BYTE_TO_STATUS.get(status);
+    }
+
     public Event toEvent (Map<String, AccountName> accounts)
     {
         Event event = new Event();
