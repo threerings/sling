@@ -51,7 +51,7 @@ public class EventRecord extends PersistentRecord
     public static final ColumnExp<String> TARGET_IP_ADDRESS = colexp(_R, "targetIpAddress");
     public static final ColumnExp<String> TARGET_MACHINE_IDENT = colexp(_R, "targetMachineIdent");
     public static final ColumnExp<String> OWNER = colexp(_R, "owner");
-    public static final ColumnExp<Event.Status> STATUS = colexp(_R, "status");
+    public static final ColumnExp<Byte> STATUS = colexp(_R, "status");
     public static final ColumnExp<Boolean> WAITING_FOR_PLAYER = colexp(_R, "waitingForPlayer");
     public static final ColumnExp<String> SUBJECT = colexp(_R, "subject");
     public static final ColumnExp<String> CHAT_HISTORY = colexp(_R, "chatHistory");
@@ -121,7 +121,9 @@ public class EventRecord extends PersistentRecord
     public String owner;
 
     /** Indicates the status of this event. */
-    public Event.Status status;
+    // TODO: this could be migrated and revert to the (non-byteenum) enum.
+    // public Event.Status status;
+    public byte status;
 
     /** Indicates agents are waiting for the player to respond. */
     public boolean waitingForPlayer;
@@ -141,6 +143,18 @@ public class EventRecord extends PersistentRecord
     @Column(nullable=true, length=2)
     public String language;
 
+    /**
+     * Support for our legacy records without conversion.
+     */
+    public static final ImmutableMap<Byte, Event.Status> BYTE_TO_STATUS;
+    static {
+        ImmutableMap.Builder<Byte, Event.Status> builder = ImmutableMap.builder();
+        for (Event.Status status : EnumSet.allOf(Event.Status.class)) {
+            builder.put(status.byteValue, status);
+        }
+        BYTE_TO_STATUS = builder.build();
+    }
+
     public Event toEvent (Map<String, AccountName> accounts)
     {
         Event event = new Event();
@@ -157,7 +171,7 @@ public class EventRecord extends PersistentRecord
                 targetAccountName, targetIpAddress, targetMachineIdent);
         }
         event.owner = accounts.get(owner);
-        event.status = status;
+        event.status = BYTE_TO_STATUS.get(status);
         event.waitingForPlayer = waitingForPlayer;
         event.subject = subject;
         event.chatHistory = chatHistory;
@@ -177,7 +191,7 @@ public class EventRecord extends PersistentRecord
         UserPetition up = new UserPetition();
         up.eventId = eventId;
         up.entered = entered.getTime();
-        up.status = status;
+        up.status = BYTE_TO_STATUS.get(status);
         up.subject = subject;
         up.messages = Lists.newArrayList();
         return up;

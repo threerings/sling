@@ -160,7 +160,7 @@ public class SlingRepository extends DepotRepository
                     dcol.lessThan(new Timestamp(range.to))));
                 break;
             case STATUS_IS:
-                primaries.add(EventRecord.STATUS.eq(filter.getEventStatus()));
+                primaries.add(EventRecord.STATUS.eq(filter.getEventStatus().byteValue));
                 break;
             case IP_ADDRESS_IS:
                 primaries.add(Ops.or(
@@ -291,7 +291,7 @@ public class SlingRepository extends DepotRepository
     public void updateEvent (int eventId, Event.Status newStatus, String newOwner)
     {
         updatePartial(EventRecord.getKey(eventId),
-            EventRecord.STATUS, newStatus,
+            EventRecord.STATUS, newStatus.byteValue,
             EventRecord.OWNER, newOwner);
     }
 
@@ -421,7 +421,7 @@ public class SlingRepository extends DepotRepository
         EventRecord event = new EventRecord();
         event.source = username;
         event.chatHistory = "";
-        event.status = Event.Status.RESOLVED_CLOSED;
+        event.status = Event.Status.RESOLVED_CLOSED.byteValue;
         event.subject = "AUTO-BAN: " + reason;
         event.type = Event.Type.SUPPORT_ACTION;
         insertEvent(event);
@@ -605,9 +605,9 @@ public class SlingRepository extends DepotRepository
     }
 
     protected static final SQLExpression<Boolean> STATUS_OPEN = Ops.not(Ops.or(
-        EventRecord.STATUS.eq(Event.Status.PLAYER_CLOSED),
-        EventRecord.STATUS.eq(Event.Status.RESOLVED_CLOSED),
-        EventRecord.STATUS.eq(Event.Status.IGNORED_CLOSED)));
+        EventRecord.STATUS.eq(Event.Status.PLAYER_CLOSED.byteValue),
+        EventRecord.STATUS.eq(Event.Status.RESOLVED_CLOSED.byteValue),
+        EventRecord.STATUS.eq(Event.Status.IGNORED_CLOSED.byteValue)));
     protected static final SQLExpression<Boolean> NOT_WAITING =
         EventRecord.WAITING_FOR_PLAYER.eq(false);
     protected static final Map<EventFilter.Type, ColumnExp<Timestamp>> DATE_COLS = ImmutableMap.of(

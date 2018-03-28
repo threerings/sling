@@ -23,20 +23,14 @@ public class Event
     /**
      * Enumeration of event status values. Caution: the instances are referenced by name in the
      * client.
-     * <p>NOTE: inheritance from ByteEnum is legacy, avoiding a complex schema change.</p>
      */
     public enum Status
-        implements com.samskivert.util.ByteEnum, com.samskivert.depot.util.ByteEnum
     {
         OPEN(1), IN_PROGRESS(2), PLAYER_CLOSED(3), RESOLVED_CLOSED(4), IGNORED_CLOSED(5),
         ESCALATED_LEAD(6), ESCALATED_ADMIN(7);
 
-        public final byte byteVal;
-
-        @Override public byte toByte ()
-        {
-            return byteVal;
-        }
+        /** A legacy byteValue, from when we were a ByteEnum. */
+        public final byte byteValue;
 
         /**
          * Returns true if this status is one associated with an open event.
@@ -49,7 +43,7 @@ public class Event
 
         Status (int value)
         {
-            this.byteVal = (byte)value;
+            this.byteValue = (byte)value;
         }
     }
 

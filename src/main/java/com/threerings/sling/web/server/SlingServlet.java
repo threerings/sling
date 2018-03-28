@@ -797,7 +797,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         }
 
         // require that the event still be in an open state for publicly visible messages
-        if (access == Message.Access.NORMAL && !event.status.isOpen()) {
+        if (access == Message.Access.NORMAL && !EventRecord.BYTE_TO_STATUS(event.status).isOpen()) {
             throw new SlingException("m.event_closed");
         }
 
@@ -847,7 +847,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             }
         }
 
-        if (isOwner && Event.Status.IN_PROGRESS.equals(event.status)) {
+        if (isOwner && (Event.Status.IN_PROGRESS.byteValue == event.status)) {
             _slingRepo.updateEvent(event.eventId, Event.Status.OPEN, null);
         }
 
@@ -1159,7 +1159,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         evrec.source = source;
         evrec.sourceHandle = handle;
         evrec.subject = petition.subject;
-        evrec.status = Event.Status.OPEN;
+        evrec.status = Event.Status.OPEN.byteValue;
         evrec.chatHistory = "";
         fillSessionInfo(evrec);
 
@@ -1203,7 +1203,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         evrec.source = source;
         evrec.target = target;
         evrec.subject = subject;
-        evrec.status = Event.Status.RESOLVED_CLOSED;
+        evrec.status = Event.Status.RESOLVED_CLOSED.byteValue;
         evrec.chatHistory = (chatHistory == null ? "" : chatHistory);
         evrec.link = link;
         fillSessionInfo(evrec);
@@ -1214,7 +1214,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
         return evrec.eventId;
     }
 
-    protected PagedResult<Event> toResult(
+    protected PagedResult<Event> toResult (
         SlingRepository.PagedQuery<EventRecord> query, PagedRequest request)
     {
         PagedResult<Event> result = new PagedResult<Event>();
