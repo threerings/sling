@@ -12,8 +12,8 @@ import com.samskivert.util.Config;
 
 import com.samskivert.servlet.SiteIdentifier;
 
-import com.samskivert.jdbc.ConnectionProvider;
-import com.samskivert.jdbc.StaticConnectionProvider;
+import com.samskivert.depot.ConnectionProvider;
+import com.samskivert.depot.StaticConnectionProvider;
 
 import com.samskivert.depot.PersistenceContext;
 

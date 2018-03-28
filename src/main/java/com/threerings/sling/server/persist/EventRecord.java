@@ -4,12 +4,13 @@
 package com.threerings.sling.server.persist;
 
 import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import com.samskivert.util.Tuple;
-
+import com.samskivert.depot.IndexDesc;
 import com.samskivert.depot.Key;
 import com.samskivert.depot.PersistentRecord;
 import com.samskivert.depot.StringFuncs;
@@ -199,7 +200,7 @@ public class EventRecord extends PersistentRecord
     /**
      * Defines the index on {@link #owner} converted to lower case.
      */
-    public static Tuple<SQLExpression<?>, Order> ixLowerOwner ()
+    public static List<IndexDesc> ixLowerOwner ()
     {
         return ix(EventRecord.OWNER);
     }
@@ -207,7 +208,7 @@ public class EventRecord extends PersistentRecord
     /**
      * Defines the index on {@link #source} converted to lower case.
      */
-    public static Tuple<SQLExpression<?>, Order> ixLowerSource ()
+    public static List<IndexDesc> ixLowerSource ()
     {
         return ix(EventRecord.SOURCE);
     }
@@ -215,7 +216,7 @@ public class EventRecord extends PersistentRecord
     /**
      * Defines the index on {@link #sourceHandle} converted to lower case.
      */
-    public static Tuple<SQLExpression<?>, Order> ixLowerSourceHandle ()
+    public static List<IndexDesc> ixLowerSourceHandle ()
     {
         return ix(EventRecord.SOURCE_HANDLE);
     }
@@ -223,7 +224,7 @@ public class EventRecord extends PersistentRecord
     /**
      * Defines the index on {@link #target} converted to lower case.
      */
-    public static Tuple<SQLExpression<?>, Order> ixLowerTarget ()
+    public static List<IndexDesc> ixLowerTarget ()
     {
         return ix(EventRecord.TARGET);
     }
@@ -231,13 +232,13 @@ public class EventRecord extends PersistentRecord
     /**
      * Defines the index on {@link #targetHandle} converted to lower case.
      */
-    public static Tuple<SQLExpression<?>, Order> ixLowerTargetHandle ()
+    public static List<IndexDesc> ixLowerTargetHandle ()
     {
         return ix(EventRecord.TARGET_HANDLE);
     }
 
-    protected static Tuple<SQLExpression<?>, Order> ix (ColumnExp<String> col)
+    protected static List<IndexDesc> ix (ColumnExp<String> col)
     {
-        return new Tuple<SQLExpression<?>, Order>(StringFuncs.lower(col), Order.ASC);
+        return Collections.singletonList(new IndexDesc(StringFuncs.lower(col), Order.ASC));
     }
 }
