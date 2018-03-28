@@ -5,9 +5,11 @@ package com.threerings.sling.server.persist;
 
 import java.sql.Timestamp;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import com.samskivert.depot.IndexDesc;

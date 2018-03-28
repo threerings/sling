@@ -797,7 +797,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
         }
 
         // require that the event still be in an open state for publicly visible messages
-        if (access == Message.Access.NORMAL && !EventRecord.BYTE_TO_STATUS(event.status).isOpen()) {
+        if (access == Message.Access.NORMAL &&
+                !EventRecord.BYTE_TO_STATUS.get(event.status).isOpen()) {
             throw new SlingException("m.event_closed");
         }
 
