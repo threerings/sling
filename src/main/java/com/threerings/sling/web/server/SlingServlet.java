@@ -780,13 +780,14 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         Caller caller = requireAuthedSupport();
-        int eventId = recordEvent(Event.Type.NOTE, caller.username, accountName, subject, "");
+        int eventId = recordEvent(Event.Type.NOTE, caller.username, accountName,
+                sanitize(subject), "");
 
         // create and add the message record
         MessageRecord msgrec = new MessageRecord();
         msgrec.eventId = eventId;
         msgrec.author = caller.username;
-        msgrec.text = note;
+        msgrec.text = sanitize(note);
         msgrec.access = Message.Access.SUPPORT;
         _slingRepo.insertMessage(msgrec, false);
 
@@ -1214,9 +1215,9 @@ public abstract class SlingServlet extends RemoteServiceServlet
         evrec.type = type;
         evrec.source = source;
         evrec.target = target;
-        evrec.subject = sanitize(subject);
+        evrec.subject = subject;
         evrec.setStatus(Event.Status.RESOLVED_CLOSED);
-        evrec.chatHistory = (chatHistory == null ? "" : sanitize(chatHistory));
+        evrec.chatHistory = (chatHistory == null ? "" : chatHistory);
         evrec.link = link;
         fillSessionInfo(evrec);
 
