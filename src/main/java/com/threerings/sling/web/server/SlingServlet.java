@@ -371,7 +371,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             for (MessageRecord msgrec : msgrecs) {
                 UserPetition petition = petitions.get(msgrec.eventId);
                 Message message = msgrec.toMessage(names);
-                message.body = sanitize(messaage.body);
+                message.body = sanitize(message.body);
                 if (message.author != null) {
                     // these are going to normal users so convert the author info to a handle
                     message.author = toHandle(message.author);
