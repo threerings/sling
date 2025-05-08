@@ -371,7 +371,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             for (MessageRecord msgrec : msgrecs) {
                 UserPetition petition = petitions.get(msgrec.eventId);
                 Message message = msgrec.toMessage(names);
-                message.body = sanitize(message.body);
+                message.body = message.body;
                 if (message.author != null) {
                     // these are going to normal users so convert the author info to a handle
                     message.author = toHandle(message.author);
@@ -1248,8 +1248,8 @@ public abstract class SlingServlet extends RemoteServiceServlet
         result.page = Lists.newArrayListWithExpectedSize(evrecs.size());
         for (EventRecord event : evrecs) {
             Event ee = event.toEvent(names);
-            ee.subject = sanitize(ee.subject);
-            ee.chatHistory = sanitize(ee.chatHistory);
+            ee.subject = ee.subject;
+            ee.chatHistory = ee.chatHistory;
             result.page.add(ee);
         }
         return result;
