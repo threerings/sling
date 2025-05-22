@@ -92,13 +92,6 @@ import static com.threerings.sling.Log.log;
 public abstract class SlingServlet extends RemoteServiceServlet
     implements SlingService
 {
-    /**
-     * Sanitize text from the enemy. Both ways? Why not?
-     */
-    public String sanitize (String str) {
-        return (str == null) ? null : str.replace("<", "&lt;").replace(">", "&gt;");
-    }
-
     // from RemoteServiceServlet
     @Override public void init (ServletConfig config)
         throws ServletException
@@ -255,7 +248,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         Caller caller = requireAuthedSupport();
 
-        reason = sanitize(reason);
         Account account = _userLogic.updateBanned(
             getSiteId(), accountId, banned, reason, untaintIdents);
         if (banned) {
@@ -277,7 +269,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         Caller caller = requireAuthedSupport();
 
-        warning = sanitize(warning);
         if (days == 0) {
             _actionHandler.warn(accountName, null);
         } else {
@@ -303,7 +294,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
     {
         Caller caller = requireAuthedSupport();
 
-        warning = sanitize(warning);
         _actionHandler.warn(accountName, warning);
 
         // record the warning
@@ -371,7 +361,6 @@ public abstract class SlingServlet extends RemoteServiceServlet
             for (MessageRecord msgrec : msgrecs) {
                 UserPetition petition = petitions.get(msgrec.eventId);
                 Message message = msgrec.toMessage(names);
-                message.body = message.body;
                 if (message.author != null) {
                     // these are going to normal users so convert the author info to a handle
                     message.author = toHandle(message.author);
@@ -780,14 +769,13 @@ public abstract class SlingServlet extends RemoteServiceServlet
         throws SlingException
     {
         Caller caller = requireAuthedSupport();
-        int eventId = recordEvent(Event.Type.NOTE, caller.username, accountName,
-                sanitize(subject), "");
+        int eventId = recordEvent(Event.Type.NOTE, caller.username, accountName, subject, "");
 
         // create and add the message record
         MessageRecord msgrec = new MessageRecord();
         msgrec.eventId = eventId;
         msgrec.author = caller.username;
-        msgrec.text = sanitize(note);
+        msgrec.text = note;
         msgrec.access = Message.Access.SUPPORT;
         _slingRepo.insertMessage(msgrec, false);
 
@@ -1169,16 +1157,16 @@ public abstract class SlingServlet extends RemoteServiceServlet
         // create a new support record for this petition
         EventRecord evrec = new EventRecord();
         evrec.type = Event.Type.PETITION;
-        evrec.source = source; // sanitize?
-        evrec.sourceHandle = handle; // sanitize?
-        evrec.subject = sanitize(petition.subject);
+        evrec.source = source;
+        evrec.sourceHandle = handle;
+        evrec.subject = petition.subject;
         evrec.setStatus(Event.Status.OPEN);
         evrec.chatHistory = "";
         fillSessionInfo(evrec);
 
         MessageRecord msgrec = new MessageRecord();
         msgrec.author = source;
-        msgrec.text = sanitize(message);
+        msgrec.text = message;
         msgrec.access = Message.Access.NORMAL;
 
         // add the event record
@@ -1247,10 +1235,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
 
         result.page = Lists.newArrayListWithExpectedSize(evrecs.size());
         for (EventRecord event : evrecs) {
-            Event ee = event.toEvent(names);
-            ee.subject = ee.subject;
-            ee.chatHistory = ee.chatHistory;
-            result.page.add(ee);
+            result.page.add(event.toEvent(names));
         }
         return result;
     }
