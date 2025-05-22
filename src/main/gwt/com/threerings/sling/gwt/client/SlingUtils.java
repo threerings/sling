@@ -175,7 +175,7 @@ public class SlingUtils
 
     /**
      * Escapes all the HTML in a string and adds link tags wrapping anything that appeared to be a
-     * URL. This handles only http protocol.
+     * URL. This handles only http/https protocol.
      */
     public static String linkify (String text)
     {

@@ -108,7 +108,7 @@ public class PetitionsPanel extends FlowPanel
 
             Button postReplyBtn = new Button(_msgs.petPostNewReply());
             FlowPanel header = Widgets.newFlowPanel("Header",
-                Widgets.newLabel(petition.subject, "Subject"),
+                Widgets.newLabel(SlingUtils.linkify(petition.subject), "Subject"),
                 Widgets.newFlowPanel(
                     Widgets.newInlineLabel(_msgs.petStatusLabel(), "Label"),
                     Widgets.newInlineLabel(" "),
@@ -155,7 +155,7 @@ public class PetitionsPanel extends FlowPanel
                     return translateServerError(cause);
                 }
             }.setBindEnterKey(false)
-             .setPromptText(_msgs.petReplyToPetition(petition.subject))
+             .setPromptText(_msgs.petReplyToPetition(SlingUtils.linkify(petition.subject)))
              .setConfirmChoices(_msgs.petPost(), _msgs.cancel());
         }
 

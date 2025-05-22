@@ -72,7 +72,7 @@ public class EventPanel extends FlowPanel
     /**
      * Creates an event panel for the given event.
      */
-    public EventPanel(SlingContext ctx, Event event)
+    public EventPanel (SlingContext ctx, Event event)
     {
         _ctx = ctx;
         _event = event;
@@ -89,7 +89,7 @@ public class EventPanel extends FlowPanel
         _statusBar.add(_status);
 
         add(new ParaPanel(_msgs.eventPanelTitle(_event.source.name.toString(),
-            _event.subject), "Title"));
+            SlingUtils.linkify(_event.subject)), "Title"));
 
         // create the event information
         int row = 0;
