@@ -36,7 +36,7 @@ public class PostMessagePanel extends FlowPanel
             String evId = String.valueOf(event.eventId);
             add(new ParaPanel(playerVisible ? _msgs.postReplyTitle(type, evId) :
                 _msgs.postNoteTitle(type, evId), "Title"));
-    
+
             String who = event.source.name.toString();
             if (event.target != null) {
                 who = _msgs.postMessageSubtitleAgainst(who, event.target.name.toString());
@@ -44,7 +44,7 @@ public class PostMessagePanel extends FlowPanel
                 who = _msgs.postMessageSubtitle(who);
             }
             add(Widgets.newFlowPanel("SubTitle",
-                new ParaPanel(event.subject, "Subject"),
+                new ParaPanel(SlingUtils.linkify(event.subject), "Subject"),
                 new ParaPanel(who, "Who")));
         }
 
