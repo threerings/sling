@@ -75,6 +75,12 @@
     </jar>
   </target>
 
+  <target name="maven-install" depends="dist"
+    description="Installs build artifacts to local Maven repository.">
+    <maveninstall file="${deploy.dir}/${ant.project.name}.jar" pom="pom.xml"/>
+    <maveninstall file="${deploy.dir}/${ant.project.name}-gwt.jar" pom="gwt-pom.xml"/>
+  </target>
+
   <target name="maven-deploy" depends="dist"
     description="Deploys build artifacts to a Maven repository.">
     <mavendeploy file="${deploy.dir}/${ant.project.name}.jar" pom="pom.xml" srcdir="${src.dir}"/>
