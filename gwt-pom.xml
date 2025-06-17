@@ -7,6 +7,13 @@
   <version>1.5-SNAPSHOT</version>
   <name>Sling GWT</name>
 
+  <repositories>
+    <repository>
+      <id>ooo-github</id>
+      <url>https://raw.githubusercontent.com/threerings/maven-repo/master/repository</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>com.threerings</groupId>
@@ -30,10 +37,4 @@
       <version>1.7.4</version>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <id>extooo.maven</id>
-      <url>http://ooo-maven.googlecode.com/hg/repository</url>
-    </repository>
-  </repositories>
 </project>

@@ -5,7 +5,7 @@
   <property name="deploy.dir" value="dist"/>
 
   <!-- bring in our standard build support -->
-  <property name="ooo-build.vers" value="2.7"/>
+  <property name="ooo-build.vers" value="2.9"/>
   <ant antfile="bootstrap.xml"/>
   <import file="${user.home}/.m2/ooo-build/${ooo-build.vers}/ooo-build.xml"/>
 
@@ -58,10 +58,10 @@
       <fileset dir="rsrc" includes="**/*"/>
     </copy>
     <!-- compile our server code with build.classpath -->
-    <ooojavac srcdir="${src.dir}" destdir="${deploy.dir}/classes" version="1.5"
+    <ooojavac srcdir="${src.dir}" destdir="${deploy.dir}/classes" version="1.8"
       classpathref="pom.xml.path"/>
     <!-- compile our GWT code with gwt-build.classpath -->
-    <ooojavac srcdir="${gsrc.dir}" destdir="${deploy.dir}/classes" version="1.5"
+    <ooojavac srcdir="${gsrc.dir}" destdir="${deploy.dir}/classes" version="1.8"
       classpathref="gwt-pom.xml.path"/>
   </target>
 
