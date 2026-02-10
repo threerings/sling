@@ -4,7 +4,8 @@
   <groupId>com.threerings</groupId>
   <artifactId>sling-gwt</artifactId>
   <packaging>jar</packaging>
-  <version>1.5</version>
+  <version>1.6-SNAPSHOT</version>
+
   <name>Sling GWT</name>
 
   <repositories>
