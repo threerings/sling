@@ -7,17 +7,35 @@
   <version>1.6-SNAPSHOT</version>
 
   <name>Sling</name>
+  <description>An ancient customer support webapp.</description>
+
+  <url>http://github.com/threerings/sling/</url>
+  <issueManagement>
+    <url>http://github.com/threering/sling/issues</url>
+  </issueManagement>
+
+  <licenses>
+    <license>
+      <name>The (New) BSD License</name>
+      <url>http://www.opensource.org/licenses/bsd-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>samskivert</id>
+      <name>Michael Bayne</name>
+      <email>mdb@samskivert.com</email>
+    </developer>
+  </developers>
 
   <scm>
-    <developerConnection>scm:git:git://src.greyhavens.co/sling.git</developerConnection>
+    <connection>scm:git:git://github.com/threerings/sling.git</connection>
+    <developerConnection>scm:git:git@github.com:threerings/sling.git</developerConnection>
+    <url>http://github.com/threerings/sling/</url>
+    <tag>HEAD</tag>
   </scm>
-
-  <repositories>
-    <repository>
-      <id>ooo-github</id>
-      <url>https://raw.githubusercontent.com/threerings/maven-repo/master/repository</url>
-    </repository>
-  </repositories>
 
   <dependencies>
     <dependency>
