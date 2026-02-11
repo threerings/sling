@@ -21,7 +21,6 @@ import com.threerings.sling.web.client.SlingException;
  *
  * @param <K> the unique id for a cache datum
  * @param <V> the type of cache data
- * @see Cache
  */
 public abstract class SimpleCache<K, V>
 {
@@ -44,7 +43,7 @@ public abstract class SimpleCache<K, V>
 
     /**
      * Gets the cache value corresponding to the given key. If the entry does not yet exist, a
-     * new entry is put in using {@link #compute()}.
+     * new entry is put in using {@link #compute}.
      */
     public V get (K key)
         throws SlingException
@@ -61,7 +60,7 @@ public abstract class SimpleCache<K, V>
     }
 
     /**
-     * Manually adds the given entry to the cache. This sidesteps the {@link #compute()} mechanism
+     * Manually adds the given entry to the cache. This sidesteps the {@link #compute} mechanism
      * for situations in which the caller has the cache value as a side effect of some other
      * operation.
      */

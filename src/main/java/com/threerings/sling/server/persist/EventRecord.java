@@ -168,7 +168,7 @@ public class EventRecord extends PersistentRecord
 
     /**
      * Get the status of this record.
-     * @See setStatus
+     * @see setStatus
      */
     public Event.Status getStatus ()
     {

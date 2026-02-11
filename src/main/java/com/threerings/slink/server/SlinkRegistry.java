@@ -27,11 +27,11 @@ import com.threerings.slink.data.SlinkCreds;
  *         The value to use for hashing the client identifier. See
  *         {@link com.threerings.presents.net.ServiceCreds ServiceCreds}</li></ul>
  * <p>The application guice module is expected to bind a properties instance for an instance with
- * the "com.threerings.slink" name annotation. For example:<pre>
+ * the "com.threerings.slink" name annotation. For example:</p><pre>
  *     bind(Properties.class)
  *         .annotatedWith(Names.named("com.threerings.slink"))
  *         .toInstance(config.getSubProperties("slink"));
- * </pre></p>
+ * </pre>
  *
  * TODO: what would be really nice would be if there were some way to detect if a connection was
  * coming in from an EC2 private IP address and use that as a secondary authentication check. The

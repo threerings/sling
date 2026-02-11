@@ -23,7 +23,7 @@ public interface Section<Ctx extends BaseContext>
      * @param args the arguments the user is navigating to. The section may modify the args in
      * order to update page fragment shown after the view is displayed. (This allows for certain
      * trickery such as pages that always refresh. See
-     * {@link com.threerings.sling.gwt.client.EventsSection).
+     * {@link com.threerings.sling.gwt.client.EventsSection}.)
      * @param previous for improved performance, the application may cache the last page created by
      * this section and pass it in
      * @throws AuthorizationException if the user is not authorized to view the requested page

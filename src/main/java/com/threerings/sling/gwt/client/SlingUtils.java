@@ -32,7 +32,7 @@ public class SlingUtils
 {
     /**
      * Translates an error from the server using messages defined in {@link ServerMessages} as
-     * well as any application bundles added with {@link #addServerErrorBundle()}.
+     * well as any application bundles added with {@link #addServerErrorBundle}.
      */
     public static String translateServerError (Throwable error)
     {
@@ -45,7 +45,7 @@ public class SlingUtils
 
     /**
      * Translates a message from the server using messages defined in {@link ServerMessages} as
-     * well as any application bundles added with {@link #addServerErrorBundle()}.
+     * well as any application bundles added with {@link #addServerErrorBundle}.
      */
     public static String translateServerMessage (String msg)
     {
@@ -65,7 +65,7 @@ public class SlingUtils
 
     /**
      * Add a new bundle of translations for server error messages. All added bundles will be
-     * consulted in order by {@link #translateServerError()}.
+     * consulted in order by {@link #translateServerError}.
      */
     public static void addServerErrorBundle (ConstantsWithLookup bundle)
     {

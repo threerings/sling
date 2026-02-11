@@ -53,7 +53,7 @@ public class AdvancedEventSearchPanel extends FlowPanel
 {
     /**
      * Displays the given event search and a button to run it. If requested, runs the search
-     * initially. Once the search is run, calls {@link SlingContext.Frame#navigatedTo()} to reflect
+     * initially. Once the search is run, calls {@link SlingContext.Frame#navigatedTo} to reflect
      * a token value that will recreate the search.
      */
     public AdvancedEventSearchPanel (SlingContext ctx, final EventSearch search, boolean run)

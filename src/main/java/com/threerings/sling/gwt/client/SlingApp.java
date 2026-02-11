@@ -171,7 +171,7 @@ public abstract class SlingApp<Ctx extends SlingContext>
 
     /**
      * Creates a toolbar appropriate for a user at the given auth level. Typically subclasses
-     * should provide their own toolbars for {@code NONE} and {@code USER| levels, but create a
+     * should provide their own toolbars for {@code NONE} and {@code USER} levels, but create a
      * sling {@link AdminBar} for {@code ADMIN} level, though this is not required. Toolbars are
      * intended to be laid out horizontally across the top.
      */

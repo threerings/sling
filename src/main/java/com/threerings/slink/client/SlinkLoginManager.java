@@ -323,7 +323,7 @@ public class SlinkLoginManager
         public int failures;
 
         /**
-         * Creates a new game host info for the given host and sets the {@link #discoveryTime}.
+         * Creates a new game host info for the given host
          */
         public GameHostInfo (GameHost host)
         {

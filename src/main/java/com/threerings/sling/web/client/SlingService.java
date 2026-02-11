@@ -28,8 +28,8 @@ import com.threerings.sling.web.data.UserPetition;
  * Provides services needed by the Sling GWT client.
  *
  * <p>NOTE: {@code Date} and {@link TimeRange} values passed into methods here are expected to be
- * converted to UTC time on the client. See {@link com.threerings.gwt.util.DateUtil#toUTC()} and
- * {@link com.threerings.sling.gwt.util.TimeRanges#toUTC()}.</p>
+ * converted to UTC time on the client. See {@code com.threerings.gwt.util.DateUtil#toUTC()} and
+ * {@code com.threerings.sling.gwt.util.TimeRanges#toUTC()}.</p>
  */
 public interface SlingService extends RemoteService
 {
@@ -101,7 +101,7 @@ public interface SlingService extends RemoteService
     }
 
     /**
-     * Information returned from {@link #assignEvent()}.
+     * Information returned from {@link #assignEvent}.
      */
     public static class AssignEventResult implements IsSerializable
     {
@@ -113,7 +113,7 @@ public interface SlingService extends RemoteService
     }
 
     /**
-     * Result for {@link #postMessage()}.
+     * Result for {@link #postMessage}.
      */
     public static class PostMessageResult implements IsSerializable
     {
@@ -181,7 +181,7 @@ public interface SlingService extends RemoteService
         /**
          * Returns the event count for the given day of the week (0=Sunday) and given hour (0-23).
          * A value of -1 means that the requested hour did not occur in the range requested in
-         * {@link SlingService#getAverageVolume()}.
+         * {@link SlingService#getAverageVolume}.
          */
         public float getEventCount (int dayOfTheWeek, int hour)
         {
@@ -344,8 +344,7 @@ public interface SlingService extends RemoteService
     /**
      * Retrieves the average volume of events reported between the given dates.
      */
-    public AverageEventVolumeByHour getAverageVolume (
-        TimeRange range, Set<Event.Type> types)
+    public AverageEventVolumeByHour getAverageVolume (TimeRange range, Set<Event.Type> types)
         throws SlingException;
 
     /**

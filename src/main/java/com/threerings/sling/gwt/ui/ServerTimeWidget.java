@@ -38,7 +38,7 @@ public class ServerTimeWidget extends Composite
     /**
      * Creates a new widget set to the given time, optionally allowing time to be edited. If
      * time is not allowed, then only the year, month and day are edited and the time returned by
-     * {@link #getTime()} will be at midnight (all time fields set to zero).
+     * {@link #getTime} will be at midnight (all time fields set to zero).
      */
     public ServerTimeWidget (long value, boolean allowTime)
     {
