@@ -4,7 +4,7 @@
   <groupId>com.threerings</groupId>
   <artifactId>sling</artifactId>
   <packaging>jar</packaging>
-  <version>1.5.2-SNAPSHOT</version>
+  <version>1.5.2</version>
 
   <name>Sling</name>
   <description>An ancient customer support webapp.</description>
@@ -34,7 +34,7 @@
     <connection>scm:git:git://github.com/threerings/sling.git</connection>
     <developerConnection>scm:git:git@github.com:threerings/sling.git</developerConnection>
     <url>http://github.com/threerings/sling/</url>
-    <tag>HEAD</tag>
+    <tag>sling-1.5.2</tag>
   </scm>
 
   <repositories>
