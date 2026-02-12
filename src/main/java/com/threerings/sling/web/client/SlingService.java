@@ -3,6 +3,7 @@
 
 package com.threerings.sling.web.client;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,7 +98,7 @@ public interface SlingService extends RemoteService
         }
 
         // usually relate to the site configuration, may be null if not needed
-        protected Map<AuthUrl, String> _externalUrls;
+        protected HashMap<AuthUrl, String> _externalUrls;
     }
 
     /**
@@ -352,7 +353,7 @@ public interface SlingService extends RemoteService
      * performed a search for open tickets, changed the status of a ticket or posted a message or
      * reply to a ticket.
      */
-    public Map<String, Long> getAgentActivity ()
+    public HashMap<String, Long> getAgentActivity ()
         throws SlingException;
 
     /**

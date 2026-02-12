@@ -6,6 +6,7 @@ package com.threerings.sling.gwt.client;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -314,7 +315,7 @@ public abstract class ReportPanel<T> extends FlowPanel
     protected static Widget newAgentActivity (
         SlingContext ctx, boolean run)
     {
-        return new ReportPanel<Map<String, Long>>(ctx, _msgs.agentActivityTitle(), run) {
+        return new ReportPanel<HashMap<String, Long>>(ctx, _msgs.agentActivityTitle(), run) {
             @Override protected void addInputs () {
             }
 
@@ -323,7 +324,7 @@ public abstract class ReportPanel<T> extends FlowPanel
                 return Reports.agentActivity();
             }
 
-            @Override protected Widget createResultWidget (Map<String, Long> result) {
+            @Override protected Widget createResultWidget (HashMap<String, Long> result) {
                 List<Map.Entry<String, Long>> entries = Lists.newArrayList(result.entrySet());
                 Collections.sort(entries, BY_TIME_VALUE);
                 SmartTable table = new SmartTable("AgentActivity", 0, 0);

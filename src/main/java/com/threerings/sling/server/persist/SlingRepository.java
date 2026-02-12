@@ -5,6 +5,7 @@ package com.threerings.sling.server.persist;
 
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -430,9 +431,9 @@ public class SlingRepository extends DepotRepository
     /**
      * Gets a map of all agent activity time stamps.
      */
-    public Map<String, Long> getAgentActivity()
+    public HashMap<String, Long> getAgentActivity()
     {
-        Map<String, Long> activity = Maps.newHashMap();
+        HashMap<String, Long> activity = Maps.newHashMap();
         for (AgentActivityRecord rec : findAll(AgentActivityRecord.class)) {
             activity.put(rec.accountName, rec.time.getTime());
         }

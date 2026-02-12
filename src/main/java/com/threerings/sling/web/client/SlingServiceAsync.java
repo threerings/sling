@@ -3,6 +3,7 @@
 
 package com.threerings.sling.web.client;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -174,7 +175,7 @@ public interface SlingServiceAsync
     /**
      * The asynchronous version of {@link SlingService#getAgentActivity}.
      */
-    public void getAgentActivity (AsyncCallback<Map<String, Long>> callback);
+    public void getAgentActivity (AsyncCallback<HashMap<String, Long>> callback);
 
     /**
      * The asynchronous version of {@link SlingService#loadMessages}.
