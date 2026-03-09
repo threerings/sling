@@ -185,6 +185,12 @@ public interface ClientMessages extends com.google.gwt.i18n.client.Messages
     @Key("redirecting")
     String redirecting ();
 
+    @Key("userUnknown")
+    String userUnknown ();
+
+    @Key("invalidPassword")
+    String invalidPassword ();
+
     @Key("loginFailed")
     String loginFailed ();
 

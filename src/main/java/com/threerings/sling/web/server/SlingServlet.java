@@ -124,6 +124,7 @@ public abstract class SlingServlet extends RemoteServiceServlet
             throw new AuthenticationException("m.invalid_password");
 
         } catch (AuthenticationFailedException afe) {
+            log.warning("Login failed", "username", username, afe);
             throw new SlingException("m.internal_error");
         }
     }

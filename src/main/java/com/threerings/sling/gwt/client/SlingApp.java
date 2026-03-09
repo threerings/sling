@@ -19,6 +19,7 @@ import com.threerings.sling.gwt.util.AuthorizationException;
 import com.threerings.sling.gwt.util.PageAddress;
 import com.threerings.sling.gwt.util.Section;
 import com.threerings.sling.gwt.util.SectionId;
+import com.threerings.sling.web.client.AuthenticationException;
 
 /**
  * A sling application. The sling application is a container with a toolbar on top and the content
@@ -125,8 +126,22 @@ public abstract class SlingApp<Ctx extends SlingContext>
             }
 
             @Override public void onFailure (Throwable caught) {
+                String error = _msgs.loginFailed();
+                if (caught instanceof AuthenticationException) {
+                    switch (caught.getMessage()) {
+                    case "m.unknown_user":
+                        error = _msgs.userUnknown();
+                        break;
+                    case "m.invalid_password":
+                        error = _msgs.invalidPassword();
+                        break;
+                    default:
+                        Console.log("Unknown auth cause", "error", caught.getMessage());
+                        break;
+                    }
+                }
                 // login failed, stick an error message next to the default toolbar and try again
-                bar().widget(Widgets.newRow(Widgets.newLabel(_msgs.loginFailed(), "uError"),
+                bar().widget(Widgets.newRow(Widgets.newLabel(error, "uError"),
                     createToolbar(_ctx.getCurrentAuthLevel(), username)));
             }
         }));
