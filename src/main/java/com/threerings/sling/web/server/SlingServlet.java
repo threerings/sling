@@ -103,11 +103,11 @@ public abstract class SlingServlet extends RemoteServiceServlet
     }
 
     // from SlingService
-    @Override public AuthInfo login (String username, String passwordHash)
+    @Override public AuthInfo login (String username, String password)
         throws SlingException
     {
         try {
-            Caller caller = _userLogic.userLogin(username, passwordHash, SESSION_EXPIRY_DAYS);
+            Caller caller = _userLogic.userLogin(username, password, SESSION_EXPIRY_DAYS);
             _callers.put(caller.authtok, caller);
             Cookie cookie = new Cookie(getSessionCookieName(), caller.authtok);
             cookie.setPath("/");

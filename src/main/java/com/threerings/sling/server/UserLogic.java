@@ -33,6 +33,7 @@ import com.samskivert.util.Config;
 
 import com.samskivert.servlet.SiteIdentifier;
 import com.samskivert.servlet.user.AuthenticationFailedException;
+import com.samskivert.servlet.user.Authenticator;
 import com.samskivert.servlet.user.InvalidPasswordException;
 import com.samskivert.servlet.user.Password;
 import com.samskivert.servlet.user.Username;
@@ -46,6 +47,7 @@ import com.threerings.sling.web.data.AccountName;
 import com.threerings.sling.web.data.MachineIdentity;
 import com.threerings.user.OOOUser;
 import com.threerings.user.OOOUserCard;
+import com.threerings.user.OOOUserManager;
 import com.threerings.user.depot.DepotUserManager;
 import com.threerings.user.depot.DepotUserRepository;
 
@@ -112,7 +114,7 @@ public class UserLogic
         throws AuthenticationFailedException, InvalidPasswordException, SlingException
     {
         Tuple<OOOUser, String> bits = _userMgr.get().login(username,
-            Password.makeFromCrypto(password), expireDays, DepotUserManager.AUTH_PASSWORD);
+            Password.makeFromClear(password), expireDays, AUTHER);
         return createCaller(bits.left, bits.right);
     }
 
@@ -563,6 +565,8 @@ public class UserLogic
     protected Cache<String, AccountName> _names = CacheBuilder.newBuilder()
         .expireAfterWrite(NAME_REFRESH_INTERVAL, TimeUnit.MILLISECONDS)
         .build();
+
+    protected static final Authenticator AUTHER = new OOOUserManager.OOOAuthenticator();
 
     protected static final int OOOUSER_PAID_MASK =
         OOOUser.HAS_BOUGHT_COINS_FLAG | OOOUser.HAS_BOUGHT_TIME_FLAG;

@@ -146,7 +146,6 @@ public class SlingContext
      */
     public void login (String username, String password, final AsyncCallback<Void> callback)
     {
-        password = frame.md5hex(password);
         svc.login(username, password, new AsyncCallback<SlingService.AuthInfo>() {
             public void onSuccess (SlingService.AuthInfo result) {
                 ainfo = result;
