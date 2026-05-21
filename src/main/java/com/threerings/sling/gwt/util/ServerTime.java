@@ -23,6 +23,15 @@ import com.threerings.gwt.util.DateUtil;
 public class ServerTime
 {
     /**
+     * A time formatter that does not do all this "server time" shenanigans. I don't know what we're
+     * trying to accomplish with all these time zone shenanigans, but this just takes a UTC
+     * timestamp and formats it in the browser's timezone.
+     */
+    public static String formatMillis (long time) {
+        return TIME.format(new Date(time));
+    }
+
+    /**
      * Creates a server time based on the server time.
      */
     public static ServerTime create (long time)
@@ -351,7 +360,7 @@ public class ServerTime
     private static final long DAY_MILLIS = 24 * HOUR_MILLIS;
     private static final TimeZone UTC = TimeZone.createTimeZone(0);
     private static final DateTimeFormat DATE = DateTimeFormat.getFormat("MMM dd yyyy");
-    private static final DateTimeFormat TIME = DateTimeFormat.getFormat("MMM dd yyyy h:mmaa");
+    private static final DateTimeFormat TIME = DateTimeFormat.getFormat("MMM dd yyyy h:mmaa z");
     private static final TimeZone TIME_ZONE = TimeZone.createTimeZone(
         TimeZoneInfo.buildTimeZoneData(
             ((TimeZoneConstants)GWT.create(TimeZoneConstants.class)).americaLosAngeles()));
